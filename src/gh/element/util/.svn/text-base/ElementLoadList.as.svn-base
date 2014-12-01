@@ -1,0 +1,55 @@
+package com.gh.app.element.util  
+{
+	public class ElementLoadList
+	{
+		public static const isPublish:Boolean = false;
+
+		public static const FILE_NAME:String = "DialogIDE_UI";
+		public static const DialogIDE_UI_WarnningBox:String = "DialogIDE_UI,WarnningBox";
+		public static const DialogIDE_UI_SureBox:String = "DialogIDE_UI,SureBox";
+		public static const DialogIDE_UI_FactorBox:String = "DialogIDE_UI,FactorBox";
+		public static const DialogIDE_UI_FactorListBox:String = "DialogIDE_UI,FactorListBox";
+		public static const DialogIDE_UI_ChangeVarBox:String = "DialogIDE_UI,ChangeVarBox";
+		public static const DialogIDE_UI_ChangeVarListBox:String = "DialogIDE_UI,ChangeVarListBox";
+		public static const DialogIDE_UI_CreateDialogBox:String = "DialogIDE_UI,CreateDialogBox";
+		public static const DialogIDE_UI_DialogManagerBox:String = "DialogIDE_UI,DialogManagerBox";
+		public static const DialogIDE_UI_CreateNormalTalk:String = "DialogIDE_UI,CreateNormalTalk";
+		public static const DialogIDE_UI_EditTalkMenu:String = "DialogIDE_UI,EditTalkMenu";
+		public static const DialogIDE_UI_NormalTalkShow:String = "DialogIDE_UI,NormalTalkShow";
+		public static const DialogIDE_UI_TalkListBox:String = "DialogIDE_UI,TalkListBox";
+		public static const DialogIDE_UI_CreateAsideTalkBox:String = "DialogIDE_UI,CreateAsideTalkBox";
+		public static const DialogIDE_UI_AsideTalkShow:String = "DialogIDE_UI,AsideTalkShow";
+		public static const DialogIDE_UI_CreateBubbleUpBox:String = "DialogIDE_UI,CreateBubbleUpBox";
+		public static const DialogIDE_UI_BubbleUpShow:String = "DialogIDE_UI,BubbleUpShow";
+		public static const DialogIDE_UI_CreateVarBox:String = "DialogIDE_UI,CreateVarBox";
+		public static const DialogIDE_UI_VarListBox:String = "DialogIDE_UI,VarListBox";
+		public static const DialogIDE_UI_CreateInputTalkBox:String = "DialogIDE_UI,CreateInputTalkBox";
+		public static const DialogIDE_UI_InputTalkShow:String = "DialogIDE_UI,InputTalkShow";
+		public static const DialogIDE_UI_CreateChooseTalkBox:String = "DialogIDE_UI,CreateChooseTalkBox";
+		public static const DialogIDE_UI_ChooseTalkShow:String = "DialogIDE_UI,ChooseTalkShow";
+		public static const DialogIDE_UI_Shield:String = "DialogIDE_UI,Shield";
+		public static const DialogIDE_UI_ChooseTalkListBox:String = "DialogIDE_UI,ChooseTalkListBox";
+		public static const DialogIDE_UI_TalkIDShow:String = "DialogIDE_UI,TalkIDShow";
+		public static const DialogIDE_UI_ImageChooseBox:String = "DialogIDE_UI,ImageChooseBox";
+		public static const DialogIDE_UI_ShowingBox:String = "DialogIDE_UI,ShowingBox";
+		public static const DialogIDE_UI_ShowBox:String = "DialogIDE_UI,ShowBox";
+		public static const DialogIDE_UI_SoundChooseBox:String = "DialogIDE_UI,SoundChooseBox";
+		public static const DialogIDE_UI_NewDialogBox:String = "DialogIDE_UI,NewDialogBox";
+		public static const DialogIDE_UI_CheckVarBox:String = "DialogIDE_UI,CheckVarBox";
+		public static const DialogIDE_UI_RoleEnableState:String = "DialogIDE_UI,RoleEnableState";
+		
+		private var _loadList:Vector.<Vector.<String>>;
+		public function ElementLoadList():void
+		{
+			this.init();
+		} 
+		private function init():void
+		{
+			_loadList = new Vector.<Vector.<String>>();
+
+			_loadList.push(Vector.<String>(["DialogIDE_UI", "DialogIDE_UI.swf"]));
+		}
+
+		public function get loadList():Vector.<Vector.<String>> { return _loadList.concat(); }
+	}
+}

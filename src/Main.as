@@ -1,8 +1,12 @@
 package {
 	import flash.display.Sprite;
+	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.ui.Keyboard;
+	import gh.element.util.ElementCreater;
+	import gh.element.util.ELL;
+	import gh.element.util.LoadManager;
 	import gh.player.GN100Player;
 	import gh.player.PlayerUser;
 	import gh.player.RTMPInfo;
@@ -14,8 +18,12 @@ package {
 	  * @date 2014/11/27 15:21
 	  **/
 	 
-	[SWF(width="1000",height="600",frameRate="24",backgroundColor="#ffffff")]
+	[SWF(width="852",height="480",frameRate="24",backgroundColor="#333333")]
+	//[SWF(width="640",height="360",frameRate="24",backgroundColor="#333333")]
+	//[SWF(width="426",height="240",frameRate="24",backgroundColor="#333333")]
 	public class Main extends Sprite {
+		
+		public static var EC:ElementCreater = null;
 		
 		private var _topLayer:Sprite;
 		private var _bottomLayer:Sprite;
@@ -30,11 +38,11 @@ package {
 			// entry point
 			
 			inits();
-			
-			playerStart();
+			loadElements();
 		}
 		private function inits():void
 		{
+			stage.scaleMode = StageScaleMode.SHOW_ALL;
 			initLayers();
 			LOG.initLog(_topLayer);
 			LOG.sd();
@@ -62,6 +70,21 @@ package {
 				changeClear();
 			}
 		}
+		private function loadElements():void
+		{
+			var loader:LoadManager = new LoadManager(new ELL());
+			LOG.show("load element: " + loader.files.length);
+			loader.addEventListener(Event.COMPLETE, loadComplete);
+			loader.load();
+		}
+		private function loadComplete(e:Event):void 
+		{
+			var loader:LoadManager = e.currentTarget as LoadManager;
+			EC = new ElementCreater(loader)
+			loader.removeEventListener(Event.COMPLETE, loadComplete);
+			
+			playerStart();
+		}
 		
 		private var _chan:VideoChannel;
 		private var _user:PlayerUser;
@@ -76,7 +99,7 @@ package {
 			_user = new PlayerUser("0", "test token");
 			_player = new GN100Player(stage.stageWidth, stage.stageHeight);
 			_bottomLayer.addChild(_player);
-			_player.start(infoList[0]);
+			_player.start(_chan);
 			LOG.show("clear num: " + infoList.length);
 		}
 		private function playerClosed():void {
@@ -88,12 +111,7 @@ package {
 		}
 		
 		private function changeClear():void {
-			var clearIndex:uint = _chan.list.indexOf(_player.playerInfo);
-			var clearLen:uint = _chan.list.length;
-			clearIndex = (clearIndex + 1) % clearLen;
-			if (clearIndex < clearLen) {
-				_player.changleClear(_chan.list[clearIndex]);
-			}
+			_player.changleClear();
 		}
 	}
 	
