@@ -67,7 +67,7 @@ package {
 			} else if (e.keyCode == Keyboard.L) {
 				LOG.sd();
 			} else if (e.keyCode == Keyboard.C) {
-				changeClear();
+				//changeClear();
 			}
 		}
 		private function loadElements():void
@@ -110,9 +110,9 @@ package {
 			}
 		}
 		
-		private function changeClear():void {
-			_player.changleClear();
-		}
+		//private function changeClear():void {
+			////_player.changleClear();
+		//}
 	}
 	
 }

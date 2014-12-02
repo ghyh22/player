@@ -3,6 +3,8 @@ package gh.player {
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
+	import gh.events.ParaEvent;
+	import gh.player.playerUI.ClearManager;
 	import gh.player.playerUI.PlayerUI;
 	/**
 	 * @author gonghao
@@ -17,7 +19,6 @@ package gh.player {
 		public function GN100Player(w:Number, h:Number) {
 			_video = new GN100Video(w, h);
 			_ui = new PlayerUI();
-			_ui.visible = false;
 			addEventListener(Event.ADDED_TO_STAGE, added);
 		}
 		private function added(e:Event):void {
@@ -33,50 +34,63 @@ package gh.player {
 			if (chan != null) {
 				_chan = chan;
 				if (_video.connected == false) {
+					_video.addEventListener(GN100Video.CONNECTION, videoConnection);
 					_video.addEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
 					_video.start(_chan.list[0]);
 					startLiveTime();
+					uiStart();
 				}
 			}
 		}
 		public function closed():void {
 			if (_video.connected) {
+				uiClose();
 				stopLiveTime();
-				_ui.visible = false;
-				_ui.close();
 				_video.closed();
 				_video.removeEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
+				_video.removeEventListener(GN100Video.CONNECTION, videoConnection);
+			}
+		}
+		private function videoConnection(e:ParaEvent):void {
+			switch(e.para["info"]) {
+				case "NetConnection.Connect.Success":
+					var clearIndex:uint = _chan.list.indexOf(_video.playInfo);
+					_ui.clear.chooseClear(clearIndex);
+                    break;
+				case "NetConnection.Connect.Failed":
+					
+					break;
+				case "NetConnection.Connect.Closed":
+					
+					break;
 			}
 		}
 		private function videoStatusChange(e:Event):void {
-			if (_video.playing) {
-				setUIState(_video.state);
-			} else {
-				if (_video.connected) {
-					_ui.visible = true;
-					_ui.start(_chan, startVideo, pauseVideo);
-				}
-			}
-		}
-		public function setUIState(state:String):void {
-			switch(state) {
-				case GN100Video.STARTING:
-				case GN100Video.STOPPING:
-				case GN100Video.STOPPED:
-				case GN100Video.PAUSED:
-					_ui.setPlayState(false, state);
-					break;
-				case GN100Video.STARTED:
-					_ui.setPlayState(true, state);
-					break;
-			}
+			_ui.setPlayState(_video.state);
 		}
 		
+		public function uiStart():void {
+			_ui.start(_chan, startVideo, pauseVideo);
+			var clearIndex:uint = _chan.list.indexOf(_video.playInfo);
+			_ui.clear.chooseClear(clearIndex);
+			_ui.clear.addEventListener(ClearManager.CLEAR_CHANGE, clearChangeEvent);
+		}
+		public function uiClose():void {
+			_ui.clear.removeEventListener(ClearManager.CLEAR_CHANGE, clearChangeEvent);
+			_ui.close();
+		}
+		private function clearChangeEvent(e:ParaEvent):void {
+			changleClear(e.para["clearIndex"]);
+		}
 		public function startVideo():void {
-			_video.startPlay();
+			if (_video.connected) {
+				_video.startPlay();
+			}
 		}
 		public function pauseVideo():void {
-			_video.pausePlay();
+			if (_video.connected) {
+				_video.pausePlay();
+			}
 		}
 		
 		private var _timer:Timer;
@@ -102,13 +116,12 @@ package gh.player {
 		 * 改变清晰度
 		 * @param	clearName
 		 */
-		public function changleClear():void {
-			var clearIndex:uint = _chan.list.indexOf(_video.playInfo);
-			var clearLen:uint = _chan.list.length;
-			clearIndex = (clearIndex + 1) % clearLen;
-			if (clearIndex < clearLen) {
-				_video.closeConnection();
-				_video.connect(_chan.list[clearIndex]);
+		public function changleClear(index:uint):void {
+			if (_video.connected) {
+				if (index < _chan.list.length) {
+					_video.closed();
+					_video.start(_chan.list[index], true);
+				}
 			}
 		}
 	}

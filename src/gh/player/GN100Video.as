@@ -8,6 +8,7 @@ package gh.player {
 	import flash.media.Video;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
+	import gh.events.ParaEvent;
 	import gh.player.playerUI.PlayerUI;
 	
 	/**
@@ -17,6 +18,7 @@ package gh.player {
 	 **/
 	public class GN100Video extends EventDispatcher {
 		public static const STATUS_CHANG:String = "video status change";
+		public static const CONNECTION:String = "connection";
 		//stream运行状态
 		public static const STARTING:String = "STARTING";
 		public static const STARTED:String = "STARTED";
@@ -38,14 +40,16 @@ package gh.player {
 		}
 		
 		private var _info:RTMPInfo;
-		public function start(info:RTMPInfo):void {
+		private var _autoPlay:Boolean;
+		public function start(info:RTMPInfo, autoPlay:Boolean = false):void {
+			_autoPlay = autoPlay;
 			connect(info);
 		}
 		public function closed():void {
 			closeConnection();
 		}
 		
-		public function connect(info:RTMPInfo):void {
+		private function connect(info:RTMPInfo):void {
 			if (_connection != null && _connection.connected) {
 				LOG.show("前一个NetConnection未断开.");
 				return;
@@ -57,6 +61,7 @@ package gh.player {
 					_remoting = true;
 				}
 				_info = info;
+				LOG.show("clear:" + info.clear);
 				_connection = new NetConnection();
 				_connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
 				_connection.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
@@ -66,7 +71,7 @@ package gh.player {
 				_connection.connect(_info.url);
 			}
 		}
-		public function closeConnection():void {
+		private function closeConnection():void {
 			if (_connection != null && _connection.connected) {
 				streamClose();
 				
@@ -76,32 +81,38 @@ package gh.player {
 				_connection = null;
 			}
 		}
-		private function netStatusHandler(event:NetStatusEvent):void {
-			LOG.show(event.info.code);
-            switch (event.info.code) {
+		private function netStatusHandler(e:NetStatusEvent):void {
+			LOG.show(e.info.code);
+			var event:ParaEvent = new ParaEvent(CONNECTION);
+			event.para["info"] = e.info.code;
+            switch (e.info.code) {
                 case "NetConnection.Connect.Success":
+					dispatchEvent(event);
 					streamStart();
-					dispatchEvent(new Event(STATUS_CHANG));
                     break;
+				case "NetConnection.Connect.Failed":
+					closeConnection();
+					dispatchEvent(event);
+					break;
+				case "NetConnection.Connect.Closed":
+					closeConnection();
+					dispatchEvent(event);
+					break;
                 case "NetStream.Play.StreamNotFound":
                     trace("Stream not found: " + _info.url);
                     break;
-				case "NetConnection.Connect.Failed":
-					
-					break;
 				case "NetStream.Connect.Closed":
-					streamClose();
+					//streamClose();
 					break;
 				case "NetStream.Play.Start":
 					playStartHandle();
 					break;
 				case "NetStream.Play.Stop":
 					closePlay();
-					_streamTime = 0;
 					break;
 				case "NetStream.Buffer.Flush":
 					if (_state == STOPPING) {
-						playStopHandle();
+						closePlay();
 					}
 					break;
             }
@@ -131,7 +142,9 @@ package gh.player {
 			_stream.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
 			_stream.addEventListener(AsyncErrorEvent.ASYNC_ERROR, asyncErrorHandle);
 			_stream.client = new StreamClient();
-			//startPlay();
+			if (_autoPlay) {
+				startPlay();
+			}
 		}
 		private function streamClose():void {
 			if (_stream != null) {
@@ -145,21 +158,18 @@ package gh.player {
 		}
 		
 		private function playStartHandle():void {
+			_playing = true;
 			updateStreamStatus(STARTED);
-			dispatchEvent(new Event(STATUS_CHANG));
 		}
 		private function playStopHandle():void {
 			updateStreamStatus(STOPPED);
-			dispatchEvent(new Event(STATUS_CHANG));
 		}
 		
 		private var _streamTime:Number;
 		public function startPlay():void {
 			if (_info.stream != null && _stream != null) {
 				if (_state == STOPPED) {
-					_playing = true;
 					updateStreamStatus(STARTING);
-					dispatchEvent(new Event(STATUS_CHANG));
 					LOG.show("start play: " + _info.stream);
 					_stream.play(_info.stream, 0);
 				} else if (_state == PAUSED) {
@@ -167,32 +177,33 @@ package gh.player {
 					_stream.seek(_streamTime);
 					_stream.resume();
 					updateStreamStatus(STARTED);
-					dispatchEvent(new Event(STATUS_CHANG));
 				}
 			} else {
 				LOG.show("error", "streamPath or stream = null");
 			}
 		}
 		public function closePlay():void {
-			if (_stream != null && _state == STARTED) {
-				_playing = false;
-				updateStreamStatus(STOPPING);
-				dispatchEvent(new Event(STATUS_CHANG));
+			if (_stream == null) return;
+			
+			_playing = false;
+			_streamTime = 0;
+			if (_state == STARTED) {
 				_stream.close();
+				updateStreamStatus(STOPPING);
+			}else if (_state == STOPPING) {
+				updateStreamStatus(STOPPED);
 			}
 		}
 		public function pausePlay():void {
 			if (_stream != null && _state == STARTED) {
+				_playing = false;
 				if (_remoting) {
-					_playing = false;
-					updateStreamStatus(STOPPING);
-					dispatchEvent(new Event(STATUS_CHANG));
 					_stream.close();
+					updateStreamStatus(STOPPING);
 				} else {
-					updateStreamStatus(PAUSED);
-					dispatchEvent(new Event(STATUS_CHANG));
 					_streamTime = _stream.time;
 					_stream.pause();
+					updateStreamStatus(PAUSED);
 				}
 			}
 		}
@@ -239,6 +250,7 @@ package gh.player {
 		 */
 		private function updateStreamStatus(state:String):void {
 			_state = state;
+			dispatchEvent(new Event(STATUS_CHANG));
 			LOG.show(state);
 		}
 		
@@ -251,25 +263,20 @@ package gh.player {
 		public function get playing():Boolean {
 			return _playing;
 		}
-		
 		public function get playInfo():RTMPInfo{
 			return _info;
 		}
-		
 		public function get state():String{
 			return _state;
 		}
-		
 		public function get remoting():Boolean{
 			return _remoting;
 		}
-		
 		public function get stream():NetStream{
 			return _stream;
 		}
 		
 	}
-
 }
 
 class StreamClient {

@@ -35,10 +35,10 @@ package gh.player.playerUI {
 			_playButton.mouseEnabled = false;
 			_pauseButton = _view.getChildByName("pauseMc") as SimpleButton;
 			_pauseButton.visible = false;
-			setPlayState(false, GN100Video.STOPPED);
+			setPlayState(GN100Video.STOPPED);
 			_fullButton = _view.getChildByName("fullMc") as SimpleButton;
 			_liveTime = _view.getChildByName("liveTimeMc") as TextField;
-			var clear:SimpleButton = _view.getChildByName("clearMc") as SimpleButton;
+			var clear:Sprite = _view.getChildByName("clearMc") as Sprite;
 			var clearList:Sprite = _view.getChildByName("clearListMc") as Sprite;
 			_clear = new ClearManager(clear, clearList);
 			setLiveTime(0);
@@ -58,7 +58,6 @@ package gh.player.playerUI {
 			_playButton.addEventListener(MouseEvent.CLICK, onPlay);
 			_pauseButton.addEventListener(MouseEvent.CLICK, onPause);
 			_fullButton.addEventListener(MouseEvent.CLICK, fullScreen);
-			setPlayState(false, GN100Video.STOPPED);
 			_clear.start(chan.list);
 		}
 		public function close():void {
@@ -88,43 +87,41 @@ package gh.player.playerUI {
 		 * @param	state
 		 * @param	videoStatus
 		 */
-		public function setPlayState(state:Boolean, videoStatus:String):void {
+		public function setPlayState(videoStatus:String):void {
 			switch(videoStatus) {
 				case GN100Video.STARTING:
 					_playButton.visible = true;
-					_pauseButton.mouseEnabled = false;
-					_pauseButton.enabled = false;
+					_playButton.enabled = false;
+					_playButton.mouseEnabled = false;
+					
 					_pauseButton.visible = false;
 					break;
 				case GN100Video.STARTED:
-					if (state) {
-						_playButton.visible = false;
-						_pauseButton.visible = true;
-						_pauseButton.mouseEnabled = true;
-						_pauseButton.enabled = true;
-					} else {
-						_playButton.visible = true;
-						_playButton.mouseEnabled = true;
-						_playButton.enabled = true;
-						_pauseButton.visible = false;
-					}
+					_playButton.visible = false;
+					
+					_pauseButton.visible = true;
+					_pauseButton.enabled = true;
+					_pauseButton.mouseEnabled = true;
 					break;
 				case GN100Video.STOPPING:
 					_playButton.visible = false;
+					
 					_pauseButton.visible = true;
-					_pauseButton.mouseEnabled = false;
 					_pauseButton.enabled = false;
+					_pauseButton.mouseEnabled = false;
 					break;
 				case GN100Video.STOPPED:
 					_playButton.visible = true;
-					_playButton.mouseEnabled = true;
 					_playButton.enabled = true;
+					_playButton.mouseEnabled = true;
+					
 					_pauseButton.visible = false;
 					break;
 				case GN100Video.PAUSED:
 					_playButton.visible = true;
-					_playButton.mouseEnabled = true;
 					_playButton.enabled = true;
+					_playButton.mouseEnabled = true;
+					
 					_pauseButton.visible = false;
 					break;
 			}
@@ -144,7 +141,10 @@ package gh.player.playerUI {
 			}
 			tmp += s;
 			_liveTime.text = tmp;
-			LOG.show(tmp);
+		}
+		
+		public function get clear():ClearManager{
+			return _clear;
 		}
 	}
 	
