@@ -17,6 +17,7 @@ package gh.player {
 		public function GN100Player(w:Number, h:Number) {
 			_video = new GN100Video(w, h);
 			_ui = new PlayerUI();
+			_ui.visible = false;
 			addEventListener(Event.ADDED_TO_STAGE, added);
 		}
 		private function added(e:Event):void {
@@ -41,6 +42,7 @@ package gh.player {
 		public function closed():void {
 			if (_video.connected) {
 				stopLiveTime();
+				_ui.visible = false;
 				_ui.close();
 				_video.closed();
 				_video.removeEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
@@ -51,7 +53,8 @@ package gh.player {
 				setUIState(_video.state);
 			} else {
 				if (_video.connected) {
-					_ui.start(startVideo, pauseVideo);
+					_ui.visible = true;
+					_ui.start(_chan, startVideo, pauseVideo);
 				}
 			}
 		}

@@ -91,9 +91,9 @@ package {
 		private var _player:GN100Player;
 		private function playerStart():void {
 			var infoList:Vector.<RTMPInfo> = Vector.<RTMPInfo>([
-												new RTMPInfo("超清", "rtmp://182.92.168.238/live", "xxx_hi"),
-												new RTMPInfo("高清", "rtmp://182.92.168.238/live", "xxx_mid"),
-												new RTMPInfo("标清", "rtmp://182.92.168.238/live", "xxx_low")
+												new RTMPInfo("超清", "rtmp://121.42.56.177/live", "xxx"),
+												new RTMPInfo("高清", "rtmp://121.42.56.177/live", "xxx"),
+												new RTMPInfo("标清", "rtmp://121.42.56.177/live", "xxx")
 												]);
 			_chan = new VideoChannel("0", infoList);
 			_user = new PlayerUser("0", "test token");

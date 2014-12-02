@@ -61,6 +61,7 @@ package gh.player {
 				_connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
 				_connection.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
 				
+				LOG.show("remoting: " + _remoting);
 				LOG.show("Connecting: " + _info.url);
 				_connection.connect(_info.url);
 			}

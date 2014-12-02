@@ -10,6 +10,7 @@ package gh.player.playerUI {
 	import gh.element.util.ELL;
 	import gh.player.GN100Player;
 	import gh.player.GN100Video;
+	import gh.player.VideoChannel;
 	/**
 	 * @author gonghao
 	 * @email yanghaogong@126.com
@@ -24,6 +25,7 @@ package gh.player.playerUI {
 		private var _pauseButton:SimpleButton;
 		private var _fullButton:SimpleButton;
 		private var _liveTime:TextField;
+		private var _clear:ClearManager;
 		public function PlayerUI() {
 			_view = Main.EC.getElement(ELL.UI_UILayer) as Sprite;
 			_bg = _view.getChildByName("bgMc") as Sprite;
@@ -36,6 +38,9 @@ package gh.player.playerUI {
 			setPlayState(false, GN100Video.STOPPED);
 			_fullButton = _view.getChildByName("fullMc") as SimpleButton;
 			_liveTime = _view.getChildByName("liveTimeMc") as TextField;
+			var clear:SimpleButton = _view.getChildByName("clearMc") as SimpleButton;
+			var clearList:Sprite = _view.getChildByName("clearListMc") as Sprite;
+			_clear = new ClearManager(clear, clearList);
 			setLiveTime(0);
 			addEventListener(Event.ADDED_TO_STAGE, added);
 		}
@@ -47,22 +52,24 @@ package gh.player.playerUI {
 		
 		private var _playFun:Function;
 		private var _pauseFun:Function;
-		public function start(play:Function, pause:Function):void {
+		public function start(chan:VideoChannel, play:Function, pause:Function):void {
 			_playFun = play;
 			_pauseFun = pause;
 			_playButton.addEventListener(MouseEvent.CLICK, onPlay);
 			_pauseButton.addEventListener(MouseEvent.CLICK, onPause);
 			_fullButton.addEventListener(MouseEvent.CLICK, fullScreen);
 			setPlayState(false, GN100Video.STOPPED);
+			_clear.start(chan.list);
 		}
 		public function close():void {
+			_clear.close();
 			_fullButton.removeEventListener(MouseEvent.CLICK, fullScreen);
 			_playButton.removeEventListener(MouseEvent.CLICK, onPause);
 			_playButton.removeEventListener(MouseEvent.CLICK, onPlay);
 			_playFun = null;
 		}
 		private function onPlay(e:MouseEvent):void {
-			_playFun(); trace("PlayUI click");
+			_playFun();
 		}
 		private function onPause(e:MouseEvent):void {
 			_pauseFun();
