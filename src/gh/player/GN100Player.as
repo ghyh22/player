@@ -34,21 +34,19 @@ package gh.player {
 			if (chan != null) {
 				_chan = chan;
 				if (_video.connected == false) {
+					uiStart();
 					_video.addEventListener(GN100Video.CONNECTION, videoConnection);
 					_video.addEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
-					_video.start(_chan.list[0]);
-					startLiveTime();
-					uiStart();
+					_video.start(_chan.list[2]);
 				}
 			}
 		}
 		public function closed():void {
 			if (_video.connected) {
-				uiClose();
-				stopLiveTime();
 				_video.closed();
 				_video.removeEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
 				_video.removeEventListener(GN100Video.CONNECTION, videoConnection);
+				uiClose();
 			}
 		}
 		private function videoConnection(e:ParaEvent):void {
@@ -71,11 +69,13 @@ package gh.player {
 		
 		public function uiStart():void {
 			_ui.start(_chan, startVideo, pauseVideo);
-			var clearIndex:uint = _chan.list.indexOf(_video.playInfo);
-			_ui.clear.chooseClear(clearIndex);
+			var clearIndex:int = _chan.list.indexOf(_video.playInfo);
+			if(clearIndex != -1)_ui.clear.chooseClear(clearIndex);
 			_ui.clear.addEventListener(ClearManager.CLEAR_CHANGE, clearChangeEvent);
+			startLiveTime();
 		}
 		public function uiClose():void {
+			stopLiveTime();
 			_ui.clear.removeEventListener(ClearManager.CLEAR_CHANGE, clearChangeEvent);
 			_ui.close();
 		}
@@ -99,7 +99,7 @@ package gh.player {
 				_timer = new Timer(1000);
 			}
 			_timer.addEventListener(TimerEvent.TIMER, updateTime);
-				_timer.start();
+			_timer.start();
 		}
 		public function stopLiveTime():void {
 			if (_timer != null) {

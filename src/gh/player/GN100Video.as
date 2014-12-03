@@ -189,7 +189,11 @@ package gh.player {
 			_streamTime = 0;
 			if (_state == STARTED) {
 				_stream.close();
-				updateStreamStatus(STOPPING);
+				if (_remoting) {
+					updateStreamStatus(STOPPING);
+				}else {
+					updateStreamStatus(STOPPED);
+				}
 			}else if (_state == STOPPING) {
 				updateStreamStatus(STOPPED);
 			}

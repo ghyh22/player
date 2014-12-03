@@ -50,7 +50,7 @@ package gh.player.playerUI {
 		}
 		
 		public function start(clearList:Vector.<RTMPInfo>):void {
-			_list = clearList;
+			_list = clearList; trace("clear start");
 			for (var i:int = 0; i < _txtList.length; i ++) {
 				var txt:TextField = _txtList[i];
 				if (i < _list.length) {
