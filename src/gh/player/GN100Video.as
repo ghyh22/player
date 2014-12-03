@@ -215,10 +215,10 @@ package gh.player {
 		 * 音量控制
 		 * @param	volume
 		 */
-		public function soundVolume(volume:Number):void {
+		public function setVolume(volume:Number):void {
 			if (_stream != null) {
 				var sound:SoundTransform = _stream.soundTransform;
-				var tmp:Number = sound.volume + volume;
+				var tmp:Number = volume;
 				if (tmp > 1) {
 					tmp = 1;
 				} else if(tmp < 0) {
@@ -234,15 +234,19 @@ package gh.player {
 		 */
 		private var _oldVolume:Number = -1;
 		public function mute():void {
-			if (_stream != null) {
+			if (_stream != null && _oldVolume == -1) {
 				var sound:SoundTransform = _stream.soundTransform;
-				if (_oldVolume != -1) {
-					sound.volume = _oldVolume;
-					_oldVolume = -1;
-				} else {
-					_oldVolume = sound.volume;
-					sound.volume = 0;
-				}
+				_oldVolume = sound.volume;
+				sound.volume = 0;
+				_stream.soundTransform = sound;
+				LOG.show("volume:" + sound.volume);
+			}
+		}
+		public function unmute():void {
+			if (_stream != null && _oldVolume != -1) {
+				var sound:SoundTransform = _stream.soundTransform;
+				sound.volume = _oldVolume;
+				_oldVolume = -1;
 				_stream.soundTransform = sound;
 				LOG.show("volume:" + sound.volume);
 			}
@@ -279,7 +283,10 @@ package gh.player {
 		public function get stream():NetStream{
 			return _stream;
 		}
-		
+		public function get volume():Number {
+			if (_stream == null) return 0;
+			return _stream.soundTransform.volume;
+		}
 	}
 }
 

@@ -37,7 +37,7 @@ package gh.player {
 					uiStart();
 					_video.addEventListener(GN100Video.CONNECTION, videoConnection);
 					_video.addEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
-					_video.start(_chan.list[2]);
+					_video.start(_chan.list[0]);
 				}
 			}
 		}
@@ -69,6 +69,7 @@ package gh.player {
 		
 		public function uiStart():void {
 			_ui.start(_chan, startVideo, pauseVideo);
+			_ui.sound.start(mute, unmute, setVolume);
 			var clearIndex:int = _chan.list.indexOf(_video.playInfo);
 			if(clearIndex != -1)_ui.clear.chooseClear(clearIndex);
 			_ui.clear.addEventListener(ClearManager.CLEAR_CHANGE, clearChangeEvent);
@@ -77,6 +78,7 @@ package gh.player {
 		public function uiClose():void {
 			stopLiveTime();
 			_ui.clear.removeEventListener(ClearManager.CLEAR_CHANGE, clearChangeEvent);
+			_ui.sound.close();
 			_ui.close();
 		}
 		private function clearChangeEvent(e:ParaEvent):void {
@@ -91,6 +93,20 @@ package gh.player {
 			if (_video.connected) {
 				_video.pausePlay();
 			}
+		}
+		public function mute():void {
+			_video.mute();
+			_ui.sound.setMute(true);
+			_ui.sound.setVolume(_video.volume);
+		}
+		public function unmute():void {
+			_video.unmute();
+			_ui.sound.setMute(false);
+			_ui.sound.setVolume(_video.volume);
+		}
+		public function setVolume(volume:Number):void {
+			_video.setVolume(volume);
+			_ui.sound.setVolume(_video.volume);
 		}
 		
 		private var _timer:Timer;

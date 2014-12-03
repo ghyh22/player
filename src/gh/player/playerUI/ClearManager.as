@@ -5,7 +5,9 @@ package gh.player.playerUI {
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
 	import flash.text.TextField;
+	import flash.utils.Timer;
 	import gh.events.ParaEvent;
 	import gh.player.RTMPInfo;
 	
@@ -25,6 +27,7 @@ package gh.player.playerUI {
 		private var _clearButs:Vector.<SimpleButton>;
 		private var _txtList:Vector.<TextField>;
 		private var _choosing:Sprite;
+		private var _timer:Timer;
 		public function ClearManager(clear:Sprite, clearList:Sprite) {
 			_choosingIndex = -1;
 			_clear = clear;
@@ -34,6 +37,7 @@ package gh.player.playerUI {
 			_clearButs = new Vector.<SimpleButton>();
 			_txtList = new Vector.<TextField>();
 			_choosing = _clearList.getChildByName("choosingMc") as Sprite;
+			_timer = new Timer(50, 10);
 			init();
 		}
 		private function init():void {
@@ -50,7 +54,7 @@ package gh.player.playerUI {
 		}
 		
 		public function start(clearList:Vector.<RTMPInfo>):void {
-			_list = clearList; trace("clear start");
+			_list = clearList;
 			for (var i:int = 0; i < _txtList.length; i ++) {
 				var txt:TextField = _txtList[i];
 				if (i < _list.length) {
@@ -64,6 +68,7 @@ package gh.player.playerUI {
 				}
 			}
 			_clear.addEventListener(MouseEvent.CLICK, showClearList);
+			_timer.addEventListener(TimerEvent.TIMER, timerEvent);
 		}
 		public function close():void {
 			_clearList.visible = false;
@@ -72,9 +77,17 @@ package gh.player.playerUI {
 				but.removeEventListener(MouseEvent.CLICK, chooseClearBut);
 			}
 			_clear.removeEventListener(MouseEvent.CLICK, showClearList);
+			_timer.removeEventListener(TimerEvent.TIMER, timerEvent);
+			_timer.stop();
 		}
 		private function showClearList(e:MouseEvent):void {
-			_clearList.visible = !_clearList.visible;
+			if (_clearList.visible) {
+				_clearList.visible = false;
+				_timer.stop();
+			}else {
+				_clearList.visible = true;
+				playShowList();
+			}
 		}
 		private function chooseClearBut(e:MouseEvent):void {
 			var index:uint = _clearButs.indexOf(e.currentTarget as SimpleButton);
@@ -101,6 +114,15 @@ package gh.player.playerUI {
 			tmp.enabled = false;
 			
 			_clearName.text = _list[_choosingIndex].clear;
+		}
+		
+		private function playShowList():void {
+			_clearList.alpha = 0;
+			_timer.reset();
+			_timer.start();
+		}
+		private function timerEvent(e:TimerEvent):void {
+			_clearList.alpha += 0.1;
 		}
 		
 		public function get choosingIndex():int{
