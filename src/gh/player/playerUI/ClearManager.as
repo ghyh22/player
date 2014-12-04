@@ -28,6 +28,7 @@ package gh.player.playerUI {
 		private var _txtList:Vector.<TextField>;
 		private var _choosing:Sprite;
 		private var _timer:Timer;
+		private var _hideTimer:Timer;
 		public function ClearManager(clear:Sprite, clearList:Sprite) {
 			_choosingIndex = -1;
 			_clear = clear;
@@ -37,7 +38,8 @@ package gh.player.playerUI {
 			_clearButs = new Vector.<SimpleButton>();
 			_txtList = new Vector.<TextField>();
 			_choosing = _clearList.getChildByName("choosingMc") as Sprite;
-			_timer = new Timer(50, 10);
+			_timer = new Timer(30, 10);
+			_hideTimer = new Timer(2000, 1);
 			init();
 		}
 		private function init():void {
@@ -69,23 +71,28 @@ package gh.player.playerUI {
 			}
 			_clear.addEventListener(MouseEvent.CLICK, showClearList);
 			_timer.addEventListener(TimerEvent.TIMER, timerEvent);
+			_timer.addEventListener(TimerEvent.TIMER_COMPLETE, showTimerComplete);
+			_hideTimer.addEventListener(TimerEvent.TIMER_COMPLETE, hideTimerComplete);
+			_clearList.addEventListener(MouseEvent.MOUSE_OVER, onOver);
+			_clearList.addEventListener(MouseEvent.MOUSE_OUT, onOut);
 		}
 		public function close():void {
-			_clearList.visible = false;
+			hideList();
 			for (var i:int = 0; i < _list.length;i ++) {
 				var but:SimpleButton = _clearButs[i];
 				but.removeEventListener(MouseEvent.CLICK, chooseClearBut);
 			}
 			_clear.removeEventListener(MouseEvent.CLICK, showClearList);
 			_timer.removeEventListener(TimerEvent.TIMER, timerEvent);
-			_timer.stop();
+			_timer.removeEventListener(TimerEvent.TIMER_COMPLETE, hideTimerComplete);
+			_hideTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, hideTimerComplete);
+			_clearList.removeEventListener(MouseEvent.MOUSE_OVER, onOver);
+			_clearList.removeEventListener(MouseEvent.MOUSE_OUT, onOut);
 		}
 		private function showClearList(e:MouseEvent):void {
 			if (_clearList.visible) {
-				_clearList.visible = false;
-				_timer.stop();
+				hideList();
 			}else {
-				_clearList.visible = true;
 				playShowList();
 			}
 		}
@@ -95,6 +102,12 @@ package gh.player.playerUI {
 			event.para["clearIndex"] = index;
 			dispatchEvent(event);
 			_clearList.visible = false;
+		}
+		private function onOver(e:MouseEvent):void {
+			_hideTimer.stop();
+		}
+		private function onOut(e:MouseEvent):void {
+			startHideList();
 		}
 		
 		public function chooseClear(index:uint):void {
@@ -116,13 +129,31 @@ package gh.player.playerUI {
 			_clearName.text = _list[_choosingIndex].clear;
 		}
 		
-		private function playShowList():void {
+		public function playShowList():void {
+			_clearList.visible = true;
 			_clearList.alpha = 0;
 			_timer.reset();
 			_timer.start();
 		}
 		private function timerEvent(e:TimerEvent):void {
 			_clearList.alpha += 0.1;
+		}
+		private function showTimerComplete(e:TimerEvent):void {
+			startHideList();
+		}
+		
+		public function startHideList():void {
+			_hideTimer.reset();
+			_hideTimer.start();
+		}
+		private function hideTimerComplete(e:TimerEvent):void {
+			hideList();
+		}
+		
+		public function hideList():void {
+			_clearList.visible = false;
+			_timer.stop();
+			_hideTimer.stop();
 		}
 		
 		public function get choosingIndex():int{

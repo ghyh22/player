@@ -3,6 +3,7 @@ package gh.player.playerUI {
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.text.TextField;
 	import flash.utils.Timer;
 	
 	/**
@@ -15,6 +16,7 @@ package gh.player.playerUI {
 		private var _silence:SimpleButton;
 		private var _volume:Sprite;
 		private var _progress:Sprite;
+		private var _txt:TextField;
 		private var _fillY:Number;
 		private var _fillLen:Number;
 		private var _timer:Timer;
@@ -28,10 +30,12 @@ package gh.player.playerUI {
 			_volume.visible = false;
 			_volume.mouseChildren = false;
 			_progress = _volume.getChildByName("progressMc") as Sprite;
+			_txt = _volume.getChildByName("volumeTxtMc") as TextField;
 			_fillY = _progress.y;
 			_fillLen = _progress.height;
 			_timer = new Timer(30, 10);
 			_showTimer = new Timer(2000, 1);
+			setVolume(0);
 		}
 		
 		private var _mute:Function;
@@ -84,7 +88,6 @@ package gh.player.playerUI {
 		private function downVolume(e:MouseEvent):void {
 			var cy:Number = e.localY;
 			var volumeVar:Number = Math.abs(cy - (_fillY + _fillLen / 2)) / _fillLen;
-			LOG.show("click volume: " + volumeVar);
 			_setVolume(volumeVar);
 			startMoveVolume();
 		}
@@ -99,7 +102,6 @@ package gh.player.playerUI {
 		private function moveVolume(e:MouseEvent):void {
 			var cy:Number = e.localY;
 			var volumeVar:Number = Math.abs(cy - (_fillY + _fillLen / 2)) / _fillLen;
-			LOG.show("click volume: " + volumeVar);
 			_setVolume(volumeVar);
 		}
 		private function upVolume(e:MouseEvent):void {
@@ -109,14 +111,14 @@ package gh.player.playerUI {
 			_volume.alpha += 0.1;
 		}
 		
-		private function showVolume():void {
+		public function showVolume():void {
 			_volume.visible = true;
 			_volume.alpha = 0;
 			_timer.reset();
 			_timer.start();
 			startShowTimer();
 		}
-		private function hideVolume():void {
+		public function hideVolume():void {
 			stopShowTimer();
 			stopMoveVolume();
 			_volume.visible = false;
@@ -136,6 +138,7 @@ package gh.player.playerUI {
 		
 		public function setVolume(volume:Number):void {
 			_progress.y = _fillY + _fillLen * (1 - volume);
+			_txt.text = Math.floor(volume * 100).toString();
 		}
 		public function setMute(flag:Boolean):void {
 			_silence.visible = flag;

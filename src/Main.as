@@ -66,7 +66,9 @@ package {
 				}
 			} else if (e.keyCode == Keyboard.L) {
 				LOG.sd();
-			} else if (e.keyCode == Keyboard.C) {
+			} else if (e.keyCode == Keyboard.P) {
+				LOG.showAppStep();
+			}else if (e.keyCode == Keyboard.C) {
 				//changeClear();
 			}
 		}
@@ -91,11 +93,11 @@ package {
 		private var _player:GN100Player;
 		private function playerStart():void {
 			var infoList:Vector.<RTMPInfo> = Vector.<RTMPInfo>([
-												new RTMPInfo("超清", "rtmp://121.42.56.177/live", "xxx"),
-												//new RTMPInfo("超清", null, "http://www.helpexamples.com/flash/video/cuepoints.flv"),
-												new RTMPInfo("高清", "rtmp://121.42.56.177/live", "xxx"),
-												new RTMPInfo("标清", "rtmp://121.42.56.177/live", "xxx"),
-												//new RTMPInfo("点播", null, "D:/video/nw.mp4")
+												new RTMPInfo("SD", "rtmp://121.42.56.177/live", "xxx"),
+												new RTMPInfo("HD", "rtmp://121.42.56.177/live", "xxx"),
+												new RTMPInfo("BD", "rtmp://121.42.56.177/live", "xxx"),
+												new RTMPInfo("DP", null, "D:/video/nw.mp4")
+												//new RTMPInfo("DP", null, "http://www.helpexamples.com/flash/video/cuepoints.flv")
 												]);
 			_chan = new VideoChannel("0", infoList);
 			_user = new PlayerUser("0", "test token");

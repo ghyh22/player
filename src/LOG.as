@@ -19,6 +19,7 @@ package
 		private static var count:uint = 0;
 		private static var text:TextField = new TextField();
 		private static var stage:Sprite;
+		private static var appStep:String = "";
 		public static function initLog(s:Sprite):void
 		{
 			text.width = 400;
@@ -37,6 +38,14 @@ package
 			text.appendText(tmp + "\n");
 			text.scrollV = text.maxScrollV;
 			count ++;
+		}
+		
+		public static function addStep(str:String):void {
+			appStep += str + "\n";
+			show(str);
+		}
+		public static function showAppStep():void {
+			text.appendText(appStep);
 		}
 		
 		/**

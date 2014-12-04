@@ -32,26 +32,32 @@ package gh.player.playerUI {
 		private var _clear:ClearManager;
 		private var _sound:SoundManager;
 		private var _uiManager:UIViewManager;
+		private var _playProgress:PlayProgress;
 		public function PlayerUI() {
 			_view = Main.EC.getElement(ELL.UI_UILayer) as Sprite;
-			_uiManager = new UIViewManager(_view);
+			initClear();
+			initSound();
+			var progress:Sprite = _view.getChildByName("playProgressMc") as Sprite;
+			_playProgress = new PlayProgress(progress);
+			_uiManager = new UIViewManager(_view, _clear, _sound, _playProgress);
 			_bg = _view.getChildByName("bgMc") as Sprite;
 			_bg.alpha = 0.7;
 			_playButton = _view.getChildByName("playMc") as SimpleButton;
 			_playButton.enabled = false;
 			_playButton.mouseEnabled = false;
+			_playButton.visible = false;
 			_playTip = _view.getChildByName("playTipMc") as Sprite;
 			_playTip.visible = false;
 			_pauseButton = _view.getChildByName("pauseMc") as SimpleButton;
 			_pauseButton.visible = false;
+			_pauseButton.enabled = false;
+			_pauseButton.mouseEnabled = false;
 			_pauseTip = _view.getChildByName("pauseTipMc") as Sprite;
 			_pauseTip.visible = false;
 			setPlayState(GN100Video.STOPPED);
 			_fullButton = _view.getChildByName("fullMc") as SimpleButton;
 			_liveTime = _view.getChildByName("liveTimeMc") as TextField;
 			setLiveTime(0);
-			initClear();
-			initSound();
 			addEventListener(Event.ADDED_TO_STAGE, added);
 		}
 		private function initClear():void {
@@ -76,7 +82,13 @@ package gh.player.playerUI {
 		
 		private var _playFun:Function;
 		private var _pauseFun:Function;
-		public function start(chan:VideoChannel, play:Function, pause:Function):void {
+		public function start(remoting:Boolean, play:Function, pause:Function):void {
+			LOG.show("UI.start");
+			if (remoting) {
+				_playProgress.view.visible = false;
+			}else {
+				_liveTime.visible = false;
+			}
 			_playFun = play;
 			_pauseFun = pause;
 			_playButton.addEventListener(MouseEvent.CLICK, onPlay);
@@ -86,12 +98,11 @@ package gh.player.playerUI {
 			_pauseButton.addEventListener(MouseEvent.MOUSE_OVER, onOver);
 			_pauseButton.addEventListener(MouseEvent.MOUSE_OUT, onOut);
 			_fullButton.addEventListener(MouseEvent.CLICK, fullScreen);
-			_clear.start(chan.list);
 			_uiManager.start();
 		}
 		public function close():void {
+			LOG.show("UI.close");
 			_uiManager.close();
-			_clear.close();
 			_fullButton.removeEventListener(MouseEvent.CLICK, fullScreen);
 			_pauseButton.removeEventListener(MouseEvent.CLICK, onPause);
 			_pauseButton.removeEventListener(MouseEvent.MOUSE_OUT, onOut);
@@ -211,6 +222,10 @@ package gh.player.playerUI {
 		
 		public function get sound():SoundManager{
 			return _sound;
+		}
+		
+		public function get playProgress():PlayProgress{
+			return _playProgress;
 		}
 	}
 	

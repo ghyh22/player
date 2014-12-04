@@ -11,11 +11,17 @@ package gh.player.playerUI {
 	 **/
 	public class UIViewManager {
 		private var _view:Sprite;
+		private var _clear:ClearManager;
+		private var _sound:SoundManager;
+		private var _progress:PlayProgress;
 		private var _bottom:Sprite;
 		private var _uiTimer:Timer;
 		private var _showTimer:Timer;
-		public function UIViewManager(view:Sprite) {
+		public function UIViewManager(view:Sprite, clear:ClearManager, sound:SoundManager, progress:PlayProgress) {
 			_view = view;
+			_clear = clear;
+			_sound = sound;
+			_progress = progress;
 			initBottom();
 			_uiTimer = new Timer(30, 10);
 			_showTimer = new Timer(2000, 1);
@@ -29,12 +35,14 @@ package gh.player.playerUI {
 			_bottom.visible = false;
 		}
 		public function start():void {
+			LOG.show("UIView.start");
 			_uiTimer.addEventListener(TimerEvent.TIMER, uiTimerEvent);
 			_uiTimer.addEventListener(TimerEvent.TIMER_COMPLETE, uiTimerComplete);
 			_showTimer.addEventListener(TimerEvent.TIMER_COMPLETE, showTimerComplete);
 			_bottom.addEventListener(MouseEvent.MOUSE_OVER, onOverBottom);
 		}
 		public function close():void {
+			LOG.show("UIView.close");
 			stopSwitch();
 			_bottom.removeEventListener(MouseEvent.MOUSE_OVER, onOverBottom);
 			_showTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, showTimerComplete);
@@ -46,11 +54,13 @@ package gh.player.playerUI {
 		}
 		
 		public function startSwitch():void {
+			LOG.show("UIView.startSwitch");
 			_view.addEventListener(MouseEvent.MOUSE_OUT, onOutView);
 			_view.addEventListener(MouseEvent.MOUSE_OVER, onOverView);
 			startUITimer();
 		}
 		public function stopSwitch():void {
+			LOG.show("UIView.stopSwitch");
 			stopUITimer();
 			_view.removeEventListener(MouseEvent.MOUSE_OUT, onOutView);
 			_view.removeEventListener(MouseEvent.MOUSE_OVER, onOverView);
@@ -96,6 +106,9 @@ package gh.player.playerUI {
 		private function switchToBottom():void {
 			_bottom.visible = true;
 			_view.visible = false;
+			_sound.hideVolume();
+			_progress.stopDragPlay();
+			_clear.hideList();
 		}
 		
 		public function get bottom():Sprite{

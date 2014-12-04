@@ -31,54 +31,76 @@ package gh.player {
 		 * @param	clearName 清晰度
 		 */
 		public function start(chan:VideoChannel):void {
-			if (chan != null) {
-				_chan = chan;
+			if (chan != null && chan.list.length > 0) {
 				if (_video.connected == false) {
-					uiStart();
+					LOG.show("Player.start");
+					_chan = chan;
+					//uiStart();
 					_video.addEventListener(GN100Video.CONNECTION, videoConnection);
 					_video.addEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
-					_video.start(_chan.list[0]);
+					_video.addEventListener(GN100Video.METE_DATA, videoMeteData);
+					_video.start(_chan.list[3]);
 				}
 			}
 		}
 		public function closed():void {
 			if (_video.connected) {
+				LOG.show("Player.close");
+				uiClose();
 				_video.closed();
+				_video.removeEventListener(GN100Video.METE_DATA, videoMeteData);
 				_video.removeEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
 				_video.removeEventListener(GN100Video.CONNECTION, videoConnection);
-				uiClose();
 			}
 		}
 		private function videoConnection(e:ParaEvent):void {
 			switch(e.para["info"]) {
 				case "NetConnection.Connect.Success":
-					var clearIndex:uint = _chan.list.indexOf(_video.playInfo);
-					_ui.clear.chooseClear(clearIndex);
+					uiStart();
+					//var clearIndex:uint = _chan.list.indexOf(_video.playInfo);
+					//_ui.clear.chooseClear(clearIndex);
                     break;
 				case "NetConnection.Connect.Failed":
 					
 					break;
 				case "NetConnection.Connect.Closed":
-					
+					uiClose();
 					break;
 			}
 		}
 		private function videoStatusChange(e:Event):void {
+			switch(_video.state) {
+				case GN100Video.STARTED:
+					
+					break;
+				case GN100Video.STOPPED:
+					
+					break;
+			}
 			_ui.setPlayState(_video.state);
+		}
+		private function videoMeteData(e:Event):void {
+			_ui.playProgress.start(jumpProgress, _video.totalTime);
+			startCountTime();
 		}
 		
 		public function uiStart():void {
-			_ui.start(_chan, startVideo, pauseVideo);
+			LOG.show("Play.uiStart");
+			_ui.start(_video.remoting, startVideo, pauseVideo);
 			_ui.sound.start(mute, unmute, setVolume);
+			_ui.sound.setVolume(_video.volume);
+			_ui.clear.start(_chan.list);
 			var clearIndex:int = _chan.list.indexOf(_video.playInfo);
 			if(clearIndex != -1)_ui.clear.chooseClear(clearIndex);
 			_ui.clear.addEventListener(ClearManager.CLEAR_CHANGE, clearChangeEvent);
-			startLiveTime();
 		}
 		public function uiClose():void {
-			stopLiveTime();
+			LOG.show("Play.uiClose");
+			stopCountTime();
+			_ui.playProgress.close();
 			_ui.clear.removeEventListener(ClearManager.CLEAR_CHANGE, clearChangeEvent);
 			_ui.sound.close();
+			_ui.clear.close();
 			_ui.close();
 		}
 		private function clearChangeEvent(e:ParaEvent):void {
@@ -109,23 +131,33 @@ package gh.player {
 			_ui.sound.setVolume(_video.volume);
 		}
 		
+		public function jumpProgress(per:Number):void {
+			_video.setProgress(per);
+		}
+		
 		private var _timer:Timer;
-		public function startLiveTime():void {
+		public function startCountTime():void {
 			if (_timer == null) {
 				_timer = new Timer(1000);
 			}
 			_timer.addEventListener(TimerEvent.TIMER, updateTime);
 			_timer.start();
 		}
-		public function stopLiveTime():void {
+		public function stopCountTime():void {
 			if (_timer != null) {
+				_ui.setLiveTime(0);
+				_ui.playProgress.setPlayTime(0);
 				_timer.stop();
 				_timer.removeEventListener(TimerEvent.TIMER, updateTime);
 			}
 		}
 		private function updateTime(e:TimerEvent):void {
-			if (_video.stream != null) {
-				_ui.setLiveTime(_video.stream.time);
+			if (_video.state == GN100Video.STARTED) {
+				if (_video.remoting) {
+					_ui.setLiveTime(_video.stream.time);
+				}else {
+					_ui.playProgress.setPlayTime(_video.stream.time);
+				}
 			}
 		}
 		/**
