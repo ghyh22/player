@@ -35,7 +35,6 @@ package gh.player {
 				if (_video.connected == false) {
 					LOG.show("Player.start");
 					_chan = chan;
-					//uiStart();
 					_video.addEventListener(GN100Video.CONNECTION, videoConnection);
 					_video.addEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
 					_video.addEventListener(GN100Video.METE_DATA, videoMeteData);
@@ -57,8 +56,6 @@ package gh.player {
 			switch(e.para["info"]) {
 				case "NetConnection.Connect.Success":
 					uiStart();
-					//var clearIndex:uint = _chan.list.indexOf(_video.playInfo);
-					//_ui.clear.chooseClear(clearIndex);
                     break;
 				case "NetConnection.Connect.Failed":
 					
@@ -71,40 +68,43 @@ package gh.player {
 		private function videoStatusChange(e:Event):void {
 			switch(_video.state) {
 				case GN100Video.STARTED:
-					
+					_ui.sound.setVolume(_video.volume);
+					_ui.uiManager.startSwitch();
 					break;
 				case GN100Video.STOPPED:
-					
+					_ui.uiManager.closeSwitch();
 					break;
 			}
 			_ui.setPlayState(_video.state);
 		}
 		private function videoMeteData(e:Event):void {
-			_ui.playProgress.start(jumpProgress, _video.totalTime);
+			if (_video.remoting == false){
+				_ui.playProgress.start(jumpProgress, _video.totalTime);
+			}
+			
 			startCountTime();
 		}
 		
 		public function uiStart():void {
 			LOG.show("Play.uiStart");
-			_ui.start(_video.remoting, startVideo, pauseVideo);
+			_ui.start(_video.remoting);
+			_ui.uiManager.start();
+			_ui.playUI.start(startVideo, pauseVideo);
 			_ui.sound.start(mute, unmute, setVolume);
-			_ui.sound.setVolume(_video.volume);
-			_ui.clear.start(_chan.list);
+			_ui.clear.start(_chan.list, changleClear);
 			var clearIndex:int = _chan.list.indexOf(_video.playInfo);
-			if(clearIndex != -1)_ui.clear.chooseClear(clearIndex);
-			_ui.clear.addEventListener(ClearManager.CLEAR_CHANGE, clearChangeEvent);
+			if (clearIndex != -1)_ui.clear.chooseClear(clearIndex);
+			_ui.setPlayState(_video.state);
 		}
 		public function uiClose():void {
 			LOG.show("Play.uiClose");
 			stopCountTime();
 			_ui.playProgress.close();
-			_ui.clear.removeEventListener(ClearManager.CLEAR_CHANGE, clearChangeEvent);
 			_ui.sound.close();
 			_ui.clear.close();
+			_ui.playUI.close();
+			_ui.uiManager.close();
 			_ui.close();
-		}
-		private function clearChangeEvent(e:ParaEvent):void {
-			changleClear(e.para["clearIndex"]);
 		}
 		public function startVideo():void {
 			if (_video.connected) {
@@ -136,13 +136,20 @@ package gh.player {
 		}
 		
 		private var _timer:Timer;
+		/**
+		 * 开始显示影片的播放时间
+		 * 每秒统计一次
+		 */
 		public function startCountTime():void {
 			if (_timer == null) {
-				_timer = new Timer(1000);
+				_timer = new Timer(200);
 			}
 			_timer.addEventListener(TimerEvent.TIMER, updateTime);
 			_timer.start();
 		}
+		/**
+		 * 停止显示影片的播放时间
+		 */
 		public function stopCountTime():void {
 			if (_timer != null) {
 				_ui.setLiveTime(0);

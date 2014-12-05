@@ -30,6 +30,7 @@ package gh.player.playerUI {
 			super();
 			_view = view;
 			_view.mouseChildren = false;
+			_view.visible = false;
 			_bg = _view.getChildByName("bgMc") as Sprite;
 			_bg.alpha = 0;
 			_fg = new Sprite();
@@ -107,7 +108,7 @@ package gh.player.playerUI {
 			_totalTime = time;
 			_totalTimeStr = makeFormatTime(time);
 		}
-		public function setPlayTime(playTime:uint):void {
+		public function setPlayTime(playTime:Number):void {
 			_playTime = playTime;
 			var tmp:String = makeFormatTime(playTime);
 			_playTimeTxt.text = tmp + "/" + _totalTimeStr;

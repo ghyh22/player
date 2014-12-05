@@ -22,43 +22,38 @@ package gh.player.playerUI {
 		public static const BOTTOM_HEIGHT:Number = 40;
 		
 		private var _view:Sprite;
+		private var _loading:Sprite;
 		private var _bg:Sprite;
-		private var _playButton:SimpleButton;
-		private var _playTip:Sprite;
-		private var _pauseButton:SimpleButton;
-		private var _pauseTip:Sprite;
-		private var _fullButton:SimpleButton;
-		private var _liveTime:TextField;
+		private var _playUI:PlayUIManager;
 		private var _clear:ClearManager;
 		private var _sound:SoundManager;
 		private var _uiManager:UIViewManager;
 		private var _playProgress:PlayProgress;
+		private var _fullButton:SimpleButton;
+		private var _liveTime:TextField;
 		public function PlayerUI() {
 			_view = Main.EC.getElement(ELL.UI_UILayer) as Sprite;
+			_loading = Main.EC.getElement(ELL.UI_Loading) as Sprite;
+			_bg = _view.getChildByName("bgMc") as Sprite;
 			initClear();
 			initSound();
+			initPlayUI();
 			var progress:Sprite = _view.getChildByName("playProgressMc") as Sprite;
 			_playProgress = new PlayProgress(progress);
-			_uiManager = new UIViewManager(_view, _clear, _sound, _playProgress);
-			_bg = _view.getChildByName("bgMc") as Sprite;
-			_bg.alpha = 0.7;
-			_playButton = _view.getChildByName("playMc") as SimpleButton;
-			_playButton.enabled = false;
-			_playButton.mouseEnabled = false;
-			_playButton.visible = false;
-			_playTip = _view.getChildByName("playTipMc") as Sprite;
-			_playTip.visible = false;
-			_pauseButton = _view.getChildByName("pauseMc") as SimpleButton;
-			_pauseButton.visible = false;
-			_pauseButton.enabled = false;
-			_pauseButton.mouseEnabled = false;
-			_pauseTip = _view.getChildByName("pauseTipMc") as Sprite;
-			_pauseTip.visible = false;
-			setPlayState(GN100Video.STOPPED);
+			_uiManager = new UIViewManager(_view, _clear, _sound, _playProgress, _playUI);
+			
 			_fullButton = _view.getChildByName("fullMc") as SimpleButton;
 			_liveTime = _view.getChildByName("liveTimeMc") as TextField;
 			setLiveTime(0);
 			addEventListener(Event.ADDED_TO_STAGE, added);
+			initStatus();
+		}
+		private function initStatus():void {
+			_fullButton.visible = false;
+			_liveTime.visible = false;
+			_loading.visible = true;
+			_bg.alpha = 0.7;
+			setLiveTime(0);
 		}
 		private function initClear():void {
 			var clear:Sprite = _view.getChildByName("clearMc") as Sprite;
@@ -71,79 +66,41 @@ package gh.player.playerUI {
 			var volume:Sprite = _view.getChildByName("volumeMc") as Sprite;
 			_sound = new SoundManager(sound, mute, volume);
 		}
+		private function initPlayUI():void {
+			var play:SimpleButton = _view.getChildByName("playMc") as SimpleButton;
+			var playTip:Sprite = _view.getChildByName("playTipMc") as Sprite;
+			var pause:SimpleButton = _view.getChildByName("pauseMc") as SimpleButton;
+			var pauseTip:Sprite = _view.getChildByName("pauseTipMc") as Sprite;
+			_playUI = new PlayUIManager(play, playTip, pause, pauseTip);
+		}
 		private function added(e:Event):void {
-			_view.x = 0;
-			_view.y = stage.stageHeight - BOTTOM_HEIGHT;
+			_loading.x = stage.stageWidth / 2;
+			_loading.y = stage.stageHeight / 2 - BOTTOM_HEIGHT;
+			addChild(_loading);
 			_uiManager.bottom.y = stage.stageHeight - _uiManager.bottom.height;
 			addChild(_uiManager.bottom);
+			_view.x = 0;
+			_view.y = stage.stageHeight - BOTTOM_HEIGHT;
 			addChild(_view);
-			
 		}
 		
-		private var _playFun:Function;
-		private var _pauseFun:Function;
-		public function start(remoting:Boolean, play:Function, pause:Function):void {
-			LOG.show("UI.start");
-			if (remoting) {
-				_playProgress.view.visible = false;
-			}else {
-				_liveTime.visible = false;
-			}
-			_playFun = play;
-			_pauseFun = pause;
-			_playButton.addEventListener(MouseEvent.CLICK, onPlay);
-			_playButton.addEventListener(MouseEvent.MOUSE_OVER, onOver);
-			_playButton.addEventListener(MouseEvent.MOUSE_OUT, onOut);
-			_pauseButton.addEventListener(MouseEvent.CLICK, onPause);
-			_pauseButton.addEventListener(MouseEvent.MOUSE_OVER, onOver);
-			_pauseButton.addEventListener(MouseEvent.MOUSE_OUT, onOut);
+		public function start(remoting:Boolean):void {
+			LOG.addStep("UI.start");
+			if (remoting)_liveTime.visible = true;
+			_fullButton.visible = true;
+			_loading.visible = false;
 			_fullButton.addEventListener(MouseEvent.CLICK, fullScreen);
-			_uiManager.start();
 		}
 		public function close():void {
-			LOG.show("UI.close");
-			_uiManager.close();
+			LOG.addStep("UI.close");
 			_fullButton.removeEventListener(MouseEvent.CLICK, fullScreen);
-			_pauseButton.removeEventListener(MouseEvent.CLICK, onPause);
-			_pauseButton.removeEventListener(MouseEvent.MOUSE_OUT, onOut);
-			_pauseButton.removeEventListener(MouseEvent.MOUSE_OVER, onOver);
-			_playButton.removeEventListener(MouseEvent.CLICK, onPlay);
-			_playButton.removeEventListener(MouseEvent.MOUSE_OUT, onOut);
-			_playButton.removeEventListener(MouseEvent.MOUSE_OVER, onOver);
-			_playFun = null;
-		}
-		private function onPlay(e:MouseEvent):void {
-			_playFun();
-		}
-		private function onPause(e:MouseEvent):void {
-			_pauseFun();
+			initStatus();
 		}
 		private function fullScreen(e:MouseEvent):void {
-			LOG.show(stage.displayState);
 			if (stage.displayState == StageDisplayState.FULL_SCREEN || stage.displayState == StageDisplayState.FULL_SCREEN_INTERACTIVE) {
 				stage.displayState = StageDisplayState.NORMAL;
 			}else {
 				stage.displayState = StageDisplayState.FULL_SCREEN;
-			}
-		}
-		private function onOver(e:MouseEvent):void {
-			switch(e.currentTarget) {
-				case _playButton:
-					_playTip.visible = true;
-					break;
-				case _pauseButton:
-					_pauseTip.visible = true;
-					break;
-			}
-		}
-		private function onOut(e:MouseEvent):void {
-			switch(e.currentTarget) {
-				case _playButton:
-					_playTip.visible = false;
-					break;
-				case _pauseButton:
-					_pauseTip.visible = false;
-					break;
 			}
 		}
 		
@@ -153,48 +110,21 @@ package gh.player.playerUI {
 		 * @param	videoStatus
 		 */
 		public function setPlayState(videoStatus:String):void {
+			_playUI.setPlayState(videoStatus);
 			switch(videoStatus) {
 				case GN100Video.STARTING:
-					_playButton.visible = true;
-					_playButton.enabled = false;
-					_playButton.mouseEnabled = false;
-					
-					_pauseButton.visible = false;
 					_bg.alpha = 0.7;
 					break;
 				case GN100Video.STARTED:
-					_playButton.visible = false;
-					
-					_pauseButton.visible = true;
-					_pauseButton.enabled = true;
-					_pauseButton.mouseEnabled = true;
 					_bg.alpha = 0.5;
-					_uiManager.startSwitch();
 					break;
 				case GN100Video.STOPPING:
-					_playButton.visible = false;
-					
-					_pauseButton.visible = true;
-					_pauseButton.enabled = false;
-					_pauseButton.mouseEnabled = false;
 					_bg.alpha = 0.7;
-					_uiManager.stopSwitch();
 					break;
 				case GN100Video.STOPPED:
-					_playButton.visible = true;
-					_playButton.enabled = true;
-					_playButton.mouseEnabled = true;
-					
-					_pauseButton.visible = false;
 					_bg.alpha = 0.7;
-					_uiManager.stopSwitch();
 					break;
 				case GN100Video.PAUSED:
-					_playButton.visible = true;
-					_playButton.enabled = true;
-					_playButton.mouseEnabled = true;
-					
-					_pauseButton.visible = false;
 					_bg.alpha = 0.7;
 					break;
 			}
@@ -226,6 +156,14 @@ package gh.player.playerUI {
 		
 		public function get playProgress():PlayProgress{
 			return _playProgress;
+		}
+		
+		public function get playUI():PlayUIManager{
+			return _playUI;
+		}
+		
+		public function get uiManager():UIViewManager{
+			return _uiManager;
 		}
 	}
 	

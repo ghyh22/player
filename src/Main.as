@@ -69,7 +69,7 @@ package {
 			} else if (e.keyCode == Keyboard.P) {
 				LOG.showAppStep();
 			}else if (e.keyCode == Keyboard.C) {
-				//changeClear();
+				LOG.appFlag = !LOG.appFlag;
 			}
 		}
 		private function loadElements():void

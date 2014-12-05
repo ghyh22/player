@@ -20,6 +20,7 @@ package
 		private static var text:TextField = new TextField();
 		private static var stage:Sprite;
 		private static var appStep:String = "";
+		public static var appFlag:Boolean = false;
 		public static function initLog(s:Sprite):void
 		{
 			text.width = 400;
@@ -42,7 +43,7 @@ package
 		
 		public static function addStep(str:String):void {
 			appStep += str + "\n";
-			show(str);
+			if(appFlag) show(str);
 		}
 		public static function showAppStep():void {
 			text.appendText(appStep);

@@ -20,21 +20,25 @@ package gh.player.playerUI {
 		private var _fillY:Number;
 		private var _fillLen:Number;
 		private var _timer:Timer;
-		private var _showTimer:Timer;
+		private var _hideTimer:Timer;
 		public function SoundManager(sound:SimpleButton, silence:SimpleButton, volume:Sprite) {
 			_sound = sound;
-			_sound.visible = true;
 			_silence = silence;
-			_silence.visible = false;
 			_volume = volume;
-			_volume.visible = false;
-			_volume.mouseChildren = false;
 			_progress = _volume.getChildByName("progressMc") as Sprite;
 			_txt = _volume.getChildByName("volumeTxtMc") as TextField;
 			_fillY = _progress.y;
 			_fillLen = _progress.height;
 			_timer = new Timer(30, 10);
-			_showTimer = new Timer(2000, 1);
+			_hideTimer = new Timer(2000, 1);
+			setVolume(0);
+			initStatus();
+		}
+		private function initStatus():void {
+			_sound.visible = false;
+			_silence.visible = false;
+			_volume.visible = false;
+			_volume.mouseChildren = false;
 			setVolume(0);
 		}
 		
@@ -45,6 +49,7 @@ package gh.player.playerUI {
 			_mute = mute;
 			_unmute = unmute;
 			_setVolume = setVolume;
+			_sound.visible = true;
 			_sound.addEventListener(MouseEvent.CLICK, onClick);
 			_sound.addEventListener(MouseEvent.MOUSE_OVER, onOverSound);
 			_volume.addEventListener(MouseEvent.MOUSE_OVER, onOverVolume);
@@ -52,25 +57,27 @@ package gh.player.playerUI {
 			_volume.addEventListener(MouseEvent.MOUSE_DOWN, downVolume);
 			_silence.addEventListener(MouseEvent.CLICK, onClick);
 			_timer.addEventListener(TimerEvent.TIMER, onTimer);
-			_showTimer.addEventListener(TimerEvent.TIMER_COMPLETE, showComplete);
+			_timer.addEventListener(TimerEvent.TIMER_COMPLETE, onTimerComplete);
+			_hideTimer.addEventListener(TimerEvent.TIMER_COMPLETE, showComplete);
 		}
 		public function close():void {
-			_timer.stop();
+			hideVolume();
 			_sound.removeEventListener(MouseEvent.CLICK, onClick);
 			_sound.removeEventListener(MouseEvent.MOUSE_OVER, onOverSound);
 			_volume.removeEventListener(MouseEvent.MOUSE_OVER, onOverVolume);
 			_volume.removeEventListener(MouseEvent.MOUSE_OUT, onOutVolume);
 			_volume.removeEventListener(MouseEvent.MOUSE_DOWN, downVolume);
-			stopMoveVolume();
 			_silence.removeEventListener(MouseEvent.CLICK, onClick);
 			_timer.removeEventListener(TimerEvent.TIMER, onTimer);
-			_showTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, showComplete);
+			_timer.removeEventListener(TimerEvent.TIMER_COMPLETE, onTimerComplete);
+			_hideTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, showComplete);
+			initStatus();
 		}
 		private function onOverSound(e:MouseEvent):void {
 			showVolume();
 		}
 		private function onOverVolume(e:MouseEvent):void {
-			stopShowTimer();
+			stopHideTimer();
 		}
 		private function onOutVolume(e:MouseEvent):void {
 			hideVolume();
@@ -107,33 +114,49 @@ package gh.player.playerUI {
 		private function upVolume(e:MouseEvent):void {
 			stopMoveVolume();
 		}
-		private function onTimer(e:TimerEvent):void {
-			_volume.alpha += 0.1;
-		}
-		
+		/**
+		 * 显示播放动画
+		 */
 		public function showVolume():void {
 			_volume.visible = true;
 			_volume.alpha = 0;
 			_timer.reset();
 			_timer.start();
-			startShowTimer();
+			//startHideTimer();
 		}
+		/**
+		 * 隐藏并停止播放显示动画
+		 * 并且停止开启隐藏的计时
+		 * 停止控制器上的操作控制
+		 */
 		public function hideVolume():void {
-			stopShowTimer();
+			stopHideTimer();
 			stopMoveVolume();
 			_volume.visible = false;
 			_timer.stop();
 		}
-		
-		private function startShowTimer():void {
-			_showTimer.reset();
-			_showTimer.start();
+		private function onTimer(e:TimerEvent):void {
+			_volume.alpha += 0.1;
 		}
-		private function stopShowTimer():void {
-			_showTimer.stop();
+		private function onTimerComplete(e:TimerEvent):void {
+			startHideTimer();
+		}
+		
+		/**
+		 * 开始开启隐藏的计时
+		 */
+		private function startHideTimer():void {
+			_hideTimer.reset();
+			_hideTimer.start();
+		}
+		/**
+		 * 停止开启隐藏的计时
+		 */
+		private function stopHideTimer():void {
+			_hideTimer.stop();
 		}
 		private function showComplete(e:TimerEvent):void {
-			hideVolume();
+			_volume.visible = false;
 		}
 		
 		public function setVolume(volume:Number):void {

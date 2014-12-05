@@ -6,6 +6,7 @@ package gh.element.util
 		
 		//public static const DialogIDE_UI_WarnningBox:String = "DialogIDE_UI,WarnningBox";
 		public static const UI_UILayer:String = "UI,UILayer";
+		public static const UI_Loading:String = "UI,Loading";
 		
 		private var _loadList:Vector.<Vector.<String>>;
 		public function ELL():void

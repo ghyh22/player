@@ -14,14 +14,16 @@ package gh.player.playerUI {
 		private var _clear:ClearManager;
 		private var _sound:SoundManager;
 		private var _progress:PlayProgress;
+		private var _playManager:PlayUIManager;
 		private var _bottom:Sprite;
 		private var _uiTimer:Timer;
 		private var _showTimer:Timer;
-		public function UIViewManager(view:Sprite, clear:ClearManager, sound:SoundManager, progress:PlayProgress) {
+		public function UIViewManager(view:Sprite, clear:ClearManager, sound:SoundManager, progress:PlayProgress, playManager:PlayUIManager) {
 			_view = view;
 			_clear = clear;
 			_sound = sound;
 			_progress = progress;
+			_playManager = playManager;
 			initBottom();
 			_uiTimer = new Timer(30, 10);
 			_showTimer = new Timer(2000, 1);
@@ -34,62 +36,79 @@ package gh.player.playerUI {
 			_bottom.alpha = 0;
 			_bottom.visible = false;
 		}
+		
 		public function start():void {
-			LOG.show("UIView.start");
+			LOG.addStep("UIView.start");
 			_uiTimer.addEventListener(TimerEvent.TIMER, uiTimerEvent);
 			_uiTimer.addEventListener(TimerEvent.TIMER_COMPLETE, uiTimerComplete);
 			_showTimer.addEventListener(TimerEvent.TIMER_COMPLETE, showTimerComplete);
 			_bottom.addEventListener(MouseEvent.MOUSE_OVER, onOverBottom);
 		}
 		public function close():void {
-			LOG.show("UIView.close");
-			stopSwitch();
+			LOG.addStep("UIView.close");
+			closeSwitch();
 			_bottom.removeEventListener(MouseEvent.MOUSE_OVER, onOverBottom);
 			_showTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, showTimerComplete);
 			_uiTimer.removeEventListener(TimerEvent.TIMER, uiTimerEvent);
 			_uiTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, uiTimerComplete);
 		}
 		private function onOverBottom(e:MouseEvent):void {
-			stopUITimer();
+			switchToUIview();
+		}
+		private function onOverView(e:MouseEvent):void {
+			stopHideTimer();
+			switchToUIview();
+		}
+		private function onOutView(e:MouseEvent):void {
+			startHideTimer();
 		}
 		
+		/**
+		 * 开启切换
+		 */
 		public function startSwitch():void {
-			LOG.show("UIView.startSwitch");
 			_view.addEventListener(MouseEvent.MOUSE_OUT, onOutView);
 			_view.addEventListener(MouseEvent.MOUSE_OVER, onOverView);
-			startUITimer();
+			startHideTimer();
 		}
-		public function stopSwitch():void {
-			LOG.show("UIView.stopSwitch");
-			stopUITimer();
+		/**
+		 * 关闭切换
+		 */
+		public function closeSwitch():void {
+			stopHideTimer();
 			_view.removeEventListener(MouseEvent.MOUSE_OUT, onOutView);
 			_view.removeEventListener(MouseEvent.MOUSE_OVER, onOverView);
 		}
-		private function onOverView(e:MouseEvent):void {
-			stopUITimer();
-		}
-		private function onOutView(e:MouseEvent):void {
-			startUITimer();
-		}
 		
-		private function startUITimer():void {
+		/**
+		 * 开启切换隐藏计时
+		 */
+		private function startHideTimer():void {
 			_showTimer.reset();
 			_showTimer.start();
 		}
-		private function stopUITimer():void {
+		/**
+		 * 停止切换隐藏计时并停止播放隐藏动画
+		 */
+		private function stopHideTimer():void {
 			_showTimer.stop();
 			stopHideUI();
 		}
 		private function showTimerComplete(e:TimerEvent):void {
 			startHideUI();
 		}
+		/**
+		 * 开始播放隐藏动画
+		 */
 		private function startHideUI():void {
 			_uiTimer.reset();
 			_uiTimer.start();
 		}
+		/**
+		 * 停止播放隐藏动画并切换为显示UI
+		 */
 		private function stopHideUI():void {
-			_uiTimer.stop();
-			switchToUIview();
+			if(_uiTimer.running) _uiTimer.stop();
 		}
 		private function uiTimerEvent(e:TimerEvent):void {
 			_view.alpha -= 0.09;
@@ -98,17 +117,28 @@ package gh.player.playerUI {
 			switchToBottom();
 		}
 		
-		private function switchToUIview():void {
+		/**
+		 * 切换到显示UI
+		 */
+		public function switchToUIview():void {
+			stopHideTimer();
 			_bottom.visible = false;
 			_view.alpha = 1;
 			_view.visible = true;
 		}
-		private function switchToBottom():void {
+		/**
+		 * 切换为隐藏UI
+		 * UI隐藏时取消声音,播放进度,清晰度动作
+		 */
+		public function switchToBottom():void {
+			stopHideTimer();
 			_bottom.visible = true;
 			_view.visible = false;
+			
 			_sound.hideVolume();
 			_progress.stopDragPlay();
 			_clear.hideList();
+			_playManager.hideTips();
 		}
 		
 		public function get bottom():Sprite{
