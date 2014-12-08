@@ -11,6 +11,7 @@ package {
 	import gh.player.PlayerUser;
 	import gh.player.RTMPInfo;
 	import gh.player.VideoChannel;
+	import gh.tools.McButton;
 	
 	/**
 	  * @author gonghao
@@ -24,6 +25,7 @@ package {
 	public class Main extends Sprite {
 		
 		public static var EC:ElementCreater = null;
+		public static var MCBUTTON:McButton = null;
 		
 		private var _topLayer:Sprite;
 		private var _bottomLayer:Sprite;
@@ -44,6 +46,7 @@ package {
 		{
 			stage.scaleMode = StageScaleMode.SHOW_ALL;
 			initLayers();
+			MCBUTTON = new McButton();
 			LOG.initLog(_topLayer);
 			LOG.sd();
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
@@ -92,11 +95,12 @@ package {
 		private var _user:PlayerUser;
 		private var _player:GN100Player;
 		private function playerStart():void {
+			LOG.show("palyer start");
 			var infoList:Vector.<RTMPInfo> = Vector.<RTMPInfo>([
-												new RTMPInfo("SD", "rtmp://121.42.56.177/live", "xxx"),
+												//new RTMPInfo("SD", null, "D:/video/nw.mp4"),
+												//new RTMPInfo("SD", "rtmp://121.42.56.177/live", "xxx"),
 												new RTMPInfo("HD", "rtmp://121.42.56.177/live", "xxx"),
 												new RTMPInfo("BD", "rtmp://121.42.56.177/live", "xxx"),
-												new RTMPInfo("DP", null, "D:/video/nw.mp4")
 												//new RTMPInfo("DP", null, "http://www.helpexamples.com/flash/video/cuepoints.flv")
 												]);
 			_chan = new VideoChannel("0", infoList);
@@ -113,10 +117,6 @@ package {
 				_player = null;
 			}
 		}
-		
-		//private function changeClear():void {
-			////_player.changleClear();
-		//}
 	}
 	
 }

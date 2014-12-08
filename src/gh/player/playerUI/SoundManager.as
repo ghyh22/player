@@ -46,6 +46,7 @@ package gh.player.playerUI {
 		private var _unmute:Function;
 		private var _setVolume:Function;
 		public function start(mute:Function, unmute:Function, setVolume:Function):void {
+			LOG.addStep("Sound.start");
 			_mute = mute;
 			_unmute = unmute;
 			_setVolume = setVolume;
@@ -61,6 +62,7 @@ package gh.player.playerUI {
 			_hideTimer.addEventListener(TimerEvent.TIMER_COMPLETE, showComplete);
 		}
 		public function close():void {
+			LOG.addStep("sound.close");
 			hideVolume();
 			_sound.removeEventListener(MouseEvent.CLICK, onClick);
 			_sound.removeEventListener(MouseEvent.MOUSE_OVER, onOverSound);

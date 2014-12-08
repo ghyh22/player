@@ -7,12 +7,12 @@ package gh.player {
 	 **/
 	public class RTMPInfo {
 		
-		public var clear:String;
+		public var name:String;
 		public var url:String;
 		public var stream:String;
 		public var cdnID:String;
-		public function RTMPInfo(clear:String, url:String, stream:String, cdnID:String = "") {
-			this.clear = clear;
+		public function RTMPInfo(name:String, url:String, stream:String, cdnID:String = "") {
+			this.name = name;
 			this.url = url;
 			this.stream = stream;
 			this.cdnID = cdnID;

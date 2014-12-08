@@ -43,10 +43,11 @@ package
 		
 		public static function addStep(str:String):void {
 			appStep += str + "\n";
-			if(appFlag) show(str);
+			if (appFlag) show(str);
 		}
 		public static function showAppStep():void {
 			text.appendText(appStep);
+			text.scrollV = text.maxScrollV;
 		}
 		
 		/**

@@ -12,6 +12,9 @@ package gh.player {
 	 * @date 2014/11/27 15:29
 	 **/
 	public class GN100Player extends Sprite {
+		public static const SD:String = "SD";
+		public static const HD:String = "HD";
+		public static const BD:String = "BD";
 		
 		private var _video:GN100Video;
 		private var _chan:VideoChannel;
@@ -30,21 +33,21 @@ package gh.player {
 		 * 开始播放
 		 * @param	clearName 清晰度
 		 */
-		public function start(chan:VideoChannel):void {
+		public function start(chan:VideoChannel, autoPlay:Boolean = false):void {
 			if (chan != null && chan.list.length > 0) {
 				if (_video.connected == false) {
-					LOG.show("Player.start");
+					LOG.addStep("Player.start");
 					_chan = chan;
 					_video.addEventListener(GN100Video.CONNECTION, videoConnection);
 					_video.addEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
 					_video.addEventListener(GN100Video.METE_DATA, videoMeteData);
-					_video.start(_chan.list[3]);
+					_video.start(_chan.list[0], autoPlay);
 				}
 			}
 		}
 		public function closed():void {
 			if (_video.connected) {
-				LOG.show("Player.close");
+				LOG.addStep("Player.close");
 				uiClose();
 				_video.closed();
 				_video.removeEventListener(GN100Video.METE_DATA, videoMeteData);
@@ -58,7 +61,7 @@ package gh.player {
 					uiStart();
                     break;
 				case "NetConnection.Connect.Failed":
-					
+					LOG.show("connect failed");
 					break;
 				case "NetConnection.Connect.Closed":
 					uiClose();
@@ -86,18 +89,17 @@ package gh.player {
 		}
 		
 		public function uiStart():void {
-			LOG.show("Play.uiStart");
+			LOG.addStep("Player.uiStart");
 			_ui.start(_video.remoting);
 			_ui.uiManager.start();
 			_ui.playUI.start(startVideo, pauseVideo);
 			_ui.sound.start(mute, unmute, setVolume);
 			_ui.clear.start(_chan.list, changleClear);
-			var clearIndex:int = _chan.list.indexOf(_video.playInfo);
-			if (clearIndex != -1)_ui.clear.chooseClear(clearIndex);
+			_ui.clear.chooseClear(_video.playInfo.name);
 			_ui.setPlayState(_video.state);
 		}
 		public function uiClose():void {
-			LOG.show("Play.uiClose");
+			LOG.addStep("Player.uiClose");
 			stopCountTime();
 			_ui.playProgress.close();
 			_ui.sound.close();
@@ -171,12 +173,10 @@ package gh.player {
 		 * 改变清晰度
 		 * @param	clearName
 		 */
-		public function changleClear(index:uint):void {
+		public function changleClear(name:String):void {
 			if (_video.connected) {
-				if (index < _chan.list.length) {
-					_video.closed();
-					_video.start(_chan.list[index], true);
-				}
+				_video.closed();
+				_video.start(_chan.getInfo(name), true);
 			}
 		}
 	}

@@ -56,7 +56,7 @@ package gh.player.playerUI {
 		private var _downFlag:Boolean;
 		private var _jumpProgress:Function;
 		public function start(jump:Function, totalTime:uint, playTime:uint = 0):void {
-			LOG.show("Progress.start");
+			LOG.show("PlayProgress.start");
 			_jumpProgress = jump;
 			_view.visible = true;
 			setTotalTime(totalTime);
@@ -67,7 +67,7 @@ package gh.player.playerUI {
 			_view.addEventListener(MouseEvent.MOUSE_DOWN, onUp);
 		}
 		public function close():void {
-			LOG.show("Progress.close");
+			LOG.show("PlayProgress.close");
 			_view.removeEventListener(MouseEvent.MOUSE_UP, onUp);
 			_view.removeEventListener(MouseEvent.MOUSE_MOVE, onMove);
 			_view.removeEventListener(MouseEvent.MOUSE_OUT, onOut);

@@ -65,7 +65,7 @@ package gh.player {
 					_remoting = true;
 				}
 				_info = info;
-				LOG.show("clear:" + info.clear);
+				LOG.show("clear:" + info.name);
 				_connection = new NetConnection();
 				_connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
 				_connection.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);

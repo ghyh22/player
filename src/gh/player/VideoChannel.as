@@ -15,7 +15,7 @@ package gh.player {
 		}
 		public function getInfo(clearName:String):RTMPInfo {
 			for (var i:int = 0; i < _list.length; i ++) {
-				if (_list[i].clear == clearName) {
+				if (_list[i].name == clearName) {
 					return _list[i];
 				}
 			}
@@ -23,7 +23,7 @@ package gh.player {
 		}
 		public function indexOf(clearName:String):int {
 			for (var i:int = 0; i < _list.length; i ++) {
-				if (_list[i].clear == clearName) {
+				if (_list[i].name == clearName) {
 					return i;
 				}
 			}
