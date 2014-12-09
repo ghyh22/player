@@ -8,15 +8,17 @@
 	<script src="js/swfobject.js"></script>
 	<script>
 		var flashvars = {
+			playInfo:"http://api.gn100.com/player.chan.info",
+			autoPlay:true
 		};
 		var params = {
-			menu: "false",
+			menu: "true",
 			width:"852",
 			height:"480",
-			scale: "noborder",
+			scale: "showall",
 			allowFullscreen: "true",
-			allowScriptAccess: "always",
-			bgcolor: "0xFFFFFF",
+			allowScriptAccess: "sameDomain",
+			bgcolor: "0xFF0000",
 			wmode: "direct" // can cause issues with FP settings & webcam
 		};
 		var attributes = {

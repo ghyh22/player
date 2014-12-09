@@ -12,9 +12,9 @@ package gh.player {
 	 * @date 2014/11/27 15:29
 	 **/
 	public class GN100Player extends Sprite {
-		public static const SD:String = "SD";
-		public static const HD:String = "HD";
-		public static const BD:String = "BD";
+		public static const SD:String = "超清";
+		public static const HD:String = "高清";
+		public static const BD:String = "标清";
 		
 		private var _video:GN100Video;
 		private var _chan:VideoChannel;

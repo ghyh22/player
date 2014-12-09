@@ -18,7 +18,13 @@ package gh.element.loader
 		}
 		override public function load(context:LoaderContext = null):void
 		{
-			this._loader.load(this._url, context);
+			try {
+				this._loader.load(this._url, context);
+			}
+			catch (e:SecurityError) {
+				LOG.show("ELL Load Error:" + e.message);
+			}
+			
 			super.load(context);
 		}
 	}

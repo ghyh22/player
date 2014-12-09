@@ -8,7 +8,9 @@ package {
 	import gh.element.util.ELL;
 	import gh.element.util.LoadManager;
 	import gh.player.GN100Player;
+	import gh.player.PlayerInfo;
 	import gh.player.PlayerUser;
+	import gh.player.RequestPlayerInfo;
 	import gh.player.RTMPInfo;
 	import gh.player.VideoChannel;
 	import gh.tools.McButton;
@@ -26,6 +28,7 @@ package {
 		
 		public static var EC:ElementCreater = null;
 		public static var MCBUTTON:McButton = null;
+		public static var SWFCONFIG:SwfConfig = null;
 		
 		private var _topLayer:Sprite;
 		private var _bottomLayer:Sprite;
@@ -44,11 +47,12 @@ package {
 		}
 		private function inits():void
 		{
-			stage.scaleMode = StageScaleMode.SHOW_ALL;
+			stage.scaleMode = StageScaleMode.EXACT_FIT;
 			initLayers();
-			MCBUTTON = new McButton();
 			LOG.initLog(_topLayer);
 			LOG.sd();
+			SWFCONFIG = new SwfConfig(stage.loaderInfo.parameters);
+			MCBUTTON = new McButton();
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 		}
 		private function initLayers():void
@@ -88,27 +92,48 @@ package {
 			EC = new ElementCreater(loader)
 			loader.removeEventListener(Event.COMPLETE, loadComplete);
 			
-			playerStart();
+			requestInfo();
 		}
 		
-		private var _chan:VideoChannel;
-		private var _user:PlayerUser;
+		private function requestInfo():void {
+			var url:String;
+			if (SWFCONFIG.playInfo != null) {
+				url = SWFCONFIG.playInfo;
+				LOG.show("playInfo from config");
+			}
+			else {
+				url = "http://api.gn100.com/player.chan.info";
+				LOG.show("playInfo from this");
+			}
+			if (url != null) {
+				var request:RequestPlayerInfo = new RequestPlayerInfo(url);
+				request.start(playerStart);
+			}
+			else {
+				playerStart();
+			}
+		}
+		
 		private var _player:GN100Player;
-		private function playerStart():void {
+		private function playerStart(playerInfo:PlayerInfo = null):void {
 			LOG.show("palyer start");
-			var infoList:Vector.<RTMPInfo> = Vector.<RTMPInfo>([
-												//new RTMPInfo("SD", null, "D:/video/nw.mp4"),
-												//new RTMPInfo("SD", "rtmp://121.42.56.177/live", "xxx"),
-												new RTMPInfo("HD", "rtmp://121.42.56.177/live", "xxx"),
-												new RTMPInfo("BD", "rtmp://121.42.56.177/live", "xxx"),
-												//new RTMPInfo("DP", null, "http://www.helpexamples.com/flash/video/cuepoints.flv")
-												]);
-			_chan = new VideoChannel("0", infoList);
-			_user = new PlayerUser("0", "test token");
+			if (playerInfo == null) {
+				var infoList:Vector.<RTMPInfo> = Vector.<RTMPInfo>([
+													new RTMPInfo("超清", null, "D:/video/nw.mp4"),
+													//new RTMPInfo("超清", "rtmp://121.42.56.177/live", "xxx"),
+													new RTMPInfo("高清", "rtmp://121.42.56.177/live", "xxx"),
+													new RTMPInfo("标清", "rtmp://121.42.56.177/live", "xxx"),
+													//new RTMPInfo("超清", null, "http://www.helpexamples.com/flash/video/cuepoints.flv")
+													]);
+				var chan:VideoChannel = new VideoChannel("0", infoList);
+				var user:PlayerUser = new PlayerUser("0", "test token");
+				playerInfo = new PlayerInfo(user, chan);
+			}
+			
 			_player = new GN100Player(stage.stageWidth, stage.stageHeight);
 			_bottomLayer.addChild(_player);
-			_player.start(_chan);
-			LOG.show("clear num: " + infoList.length);
+			_player.start(playerInfo.chan, SWFCONFIG.autoPlay);
+			LOG.show("clear num: " + playerInfo.chan.list.length);
 		}
 		private function playerClosed():void {
 			if (_player != null) {
@@ -117,6 +142,7 @@ package {
 				_player = null;
 			}
 		}
+		
 	}
 	
 }
