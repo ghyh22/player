@@ -29,10 +29,8 @@ package {
 		public static var EC:ElementCreater = null;
 		public static var MCBUTTON:McButton = null;
 		public static var SWFCONFIG:SwfConfig = null;
+		public static var EXTERNALCALL:ExternalCall = null;
 		
-		private var _topLayer:Sprite;
-		private var _bottomLayer:Sprite;
-		private var _middleLayer:Sprite;
 		public function Main():void {
 			if (stage) init();
 			else addEventListener(Event.ADDED_TO_STAGE, init);
@@ -42,27 +40,23 @@ package {
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
 			
+			initLayers();
 			inits();
 			loadElements();
 		}
-		private function inits():void
-		{
-			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			initLayers();
-			LOG.initLog(_topLayer);
-			LOG.sd();
-			SWFCONFIG = new SwfConfig(stage.loaderInfo.parameters);
-			MCBUTTON = new McButton();
-			stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-		}
+		private var _topLayer:Sprite;
+		private var _bottomLayer:Sprite;
+		private var _middleLayer:Sprite;
 		private function initLayers():void
 		{
+			stage.scaleMode = StageScaleMode.EXACT_FIT;
 			_bottomLayer = new Sprite();
 			addChild(_bottomLayer);
 			_middleLayer = new Sprite();
 			addChild(_middleLayer);
 			_topLayer = new Sprite();
 			addChild(_topLayer);
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 		}
 		private function onKeyDown(e:KeyboardEvent):void {
 			if (e.keyCode == Keyboard.X) {
@@ -79,6 +73,16 @@ package {
 				LOG.appFlag = !LOG.appFlag;
 			}
 		}
+		private var _resourece:ResourceManager;
+		private function inits():void
+		{
+			LOG.initLog(_topLayer);
+			LOG.sd();
+			_resourece = new ResourceManager(_topLayer);
+			_resourece.start();
+			SWFCONFIG = new SwfConfig(stage.loaderInfo.parameters);
+			MCBUTTON = new McButton();
+		}
 		private function loadElements():void
 		{
 			var loader:LoadManager = new LoadManager(new ELL());
@@ -92,6 +96,9 @@ package {
 			EC = new ElementCreater(loader)
 			loader.removeEventListener(Event.COMPLETE, loadComplete);
 			
+			startUp();
+		}
+		private function startUp():void {
 			requestInfo();
 		}
 		
@@ -115,9 +122,11 @@ package {
 		}
 		
 		private var _player:GN100Player;
+		private var _playerInfo:PlayerInfo;
 		private function playerStart(playerInfo:PlayerInfo = null):void {
 			LOG.show("palyer start");
-			if (playerInfo == null) {
+			if (playerInfo == null && _playerInfo == null) {
+				LOG.show("使用本地视频测试.");
 				var infoList:Vector.<RTMPInfo> = Vector.<RTMPInfo>([
 													new RTMPInfo("超清", null, "D:/video/nw.mp4"),
 													//new RTMPInfo("超清", "rtmp://121.42.56.177/live", "xxx"),
@@ -127,18 +136,22 @@ package {
 													]);
 				var chan:VideoChannel = new VideoChannel("0", infoList);
 				var user:PlayerUser = new PlayerUser("0", "test token");
-				playerInfo = new PlayerInfo(user, chan);
+				_playerInfo = new PlayerInfo(user, chan);
+			}
+			else if(playerInfo != null) {
+				_playerInfo = playerInfo;
 			}
 			
 			_player = new GN100Player(stage.stageWidth, stage.stageHeight);
 			_bottomLayer.addChild(_player);
-			_player.start(playerInfo.chan, SWFCONFIG.autoPlay);
-			LOG.show("clear num: " + playerInfo.chan.list.length);
+			_player.start(_playerInfo.chan, SWFCONFIG.autoPlay, SWFCONFIG.clear);
+			LOG.show("clear num: " + _playerInfo.chan.list.length);
 		}
 		private function playerClosed():void {
+			LOG.show("player closed");
 			if (_player != null) {
 				_player.closed();
-				removeChild(_player);
+				_bottomLayer.removeChild(_player);
 				_player = null;
 			}
 		}

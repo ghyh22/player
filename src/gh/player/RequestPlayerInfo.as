@@ -24,14 +24,16 @@ package gh.player {
 			_loader.load(_url);
 		}
 		public function close():void {
+			LOG.show("request closed");
+			_receive = null;
 			_loader.close();
 			_loader.removeEventListener(Event.COMPLETE, loaderComplete);
 		}
 		private function loaderComplete(e:Event):void {
 			var data:Object = JSON.parse(_loader.data);
 			_playerInfo = ResolvePlayerInfo.resolvePlayerInfo(data);
-			
 			_receive(_playerInfo);
+			close();
 		}
 		
 		public function get playerInfo():PlayerInfo{

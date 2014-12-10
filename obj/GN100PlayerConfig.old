@@ -16,7 +16,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'2014/12/9'</value>
+      <value>'2014/12/10'</value>
     </define>
     <define append="true">
       <name>CONFIG::air</name>
@@ -33,6 +33,7 @@
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
       <path-element>D:\work\flash\projects\GN100Player\src</path-element>
+      <path-element>D:\work\flash\lib</path-element>
       <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
   </compiler>

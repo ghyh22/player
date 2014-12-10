@@ -80,9 +80,9 @@ package gh.player {
 				LOG.show("GN100Video.closeConnection");
 				streamClose();
 				
-				_connection.close();
 				_connection.removeEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
 				_connection.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+				_connection.close();
 				_connection = null;
 			}
 		}
@@ -224,6 +224,12 @@ package gh.player {
 		public function setProgress(per:Number):void {
 			if (_info.stream != null && _stream != null) {
 				if (_state == STARTED || _state == PAUSED) {
+					if (per < 0) {
+						per = 0;
+					}
+					else if (per > 1) {
+						per = 1;
+					}
 					var time:Number = _totalTime * per;
 					_stream.pause();
 					_stream.seek(time);
@@ -271,6 +277,9 @@ package gh.player {
 				_stream.soundTransform = sound;
 				LOG.show("volume:" + sound.volume);
 			}
+		}
+		public function get muteStatus():Boolean {
+			return _oldVolume != -1;
 		}
 		
 		/**

@@ -30,6 +30,7 @@ package gh.player.playerUI {
 		private var _uiManager:UIViewManager;
 		private var _playProgress:PlayProgress;
 		private var _fullButton:SimpleButton;
+		private var _quitFull:SimpleButton;
 		private var _liveTime:TextField;
 		public function PlayerUI() {
 			_view = Main.EC.getElement(ELL.UI_UILayer) as Sprite;
@@ -43,6 +44,7 @@ package gh.player.playerUI {
 			_uiManager = new UIViewManager(_view, _clear, _sound, _playProgress, _playUI);
 			
 			_fullButton = _view.getChildByName("fullMc") as SimpleButton;
+			_quitFull = _view.getChildByName("quitFullMc") as SimpleButton;
 			_liveTime = _view.getChildByName("liveTimeMc") as TextField;
 			setLiveTime(0);
 			addEventListener(Event.ADDED_TO_STAGE, added);
@@ -50,6 +52,7 @@ package gh.player.playerUI {
 		}
 		private function initStatus():void {
 			_fullButton.visible = false;
+			_quitFull.visible = false;
 			_liveTime.visible = false;
 			_loading.visible = true;
 			_bg.alpha = 0.7;
@@ -90,17 +93,26 @@ package gh.player.playerUI {
 			_fullButton.visible = true;
 			_loading.visible = false;
 			_fullButton.addEventListener(MouseEvent.CLICK, fullScreen);
+			_quitFull.addEventListener(MouseEvent.CLICK, quitFullScreen);
 		}
 		public function close():void {
 			LOG.addStep("UI.close");
+			_quitFull.removeEventListener(MouseEvent.CLICK, quitFullScreen);
 			_fullButton.removeEventListener(MouseEvent.CLICK, fullScreen);
 			initStatus();
 		}
 		private function fullScreen(e:MouseEvent):void {
+			if (stage.displayState == StageDisplayState.NORMAL) {
+				stage.displayState = StageDisplayState.FULL_SCREEN;
+				_fullButton.visible = false;
+				_quitFull.visible = true;
+			}
+		}
+		private function quitFullScreen(e:MouseEvent):void {
 			if (stage.displayState == StageDisplayState.FULL_SCREEN || stage.displayState == StageDisplayState.FULL_SCREEN_INTERACTIVE) {
 				stage.displayState = StageDisplayState.NORMAL;
-			}else {
-				stage.displayState = StageDisplayState.FULL_SCREEN;
+				_fullButton.visible = true;
+				_quitFull.visible = false;
 			}
 		}
 		

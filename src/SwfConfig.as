@@ -8,9 +8,11 @@ package  {
 	public class SwfConfig {
 		public var autoPlay:Boolean;
 		public var playInfo:String;
+		public var clear:String;
 		public function SwfConfig(para:Object) {
 			autoPlay = para["autoPlay"];
 			playInfo = para["playInfo"];
+			clear = para["clear"];
 		}
 		
 	}

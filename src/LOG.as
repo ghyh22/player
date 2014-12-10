@@ -10,6 +10,7 @@ package
 	 **/
 	public class LOG 
 	{
+		public static var appFlag:Boolean = false;
 		
 		public function LOG() 
 		{
@@ -20,17 +21,20 @@ package
 		private static var text:TextField = new TextField();
 		private static var stage:Sprite;
 		private static var appStep:String = "";
-		public static var appFlag:Boolean = false;
-		public static function initLog(s:Sprite):void
+		private static var debug:Boolean = false;
+		public static function initLog(s:Sprite, debugFlag:Boolean = true):void
 		{
 			text.width = 400;
 			text.height = 200;
 			text.border = true;
 			text.background = true;
 			stage = s;
+			debug = debugFlag;
+			if (debug) stage.addChild(text);
 		}
 		
 		public static function show(str:String, meg:String = null):void {
+			if (!debug) return;
 			var tmp:String = count.toString() + ": " + str;
 			if (meg != null) {
 				tmp += " : " + meg;
@@ -42,10 +46,12 @@ package
 		}
 		
 		public static function addStep(str:String):void {
+			if (!debug) return;
 			appStep += str + "\n";
 			if (appFlag) show(str);
 		}
 		public static function showAppStep():void {
+			if (!debug) return;
 			text.appendText(appStep);
 			text.scrollV = text.maxScrollV;
 		}
@@ -54,6 +60,7 @@ package
 		 * 显示隐藏
 		 */
 		public static function sd():void {
+			if (!debug) return;
 			if (stage.contains(text)) {
 				stage.removeChild(text);
 			}else {

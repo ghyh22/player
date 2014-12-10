@@ -33,7 +33,7 @@ package gh.player {
 		 * 开始播放
 		 * @param	clearName 清晰度
 		 */
-		public function start(chan:VideoChannel, autoPlay:Boolean = false):void {
+		public function start(chan:VideoChannel, autoPlay:Boolean = false, clear:String = null):void {
 			if (chan != null && chan.list.length > 0) {
 				if (_video.connected == false) {
 					LOG.addStep("Player.start");
@@ -41,13 +41,27 @@ package gh.player {
 					_video.addEventListener(GN100Video.CONNECTION, videoConnection);
 					_video.addEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
 					_video.addEventListener(GN100Video.METE_DATA, videoMeteData);
-					_video.start(_chan.list[0], autoPlay);
+					var tmp:RTMPInfo = selectedClear(clear);
+					_video.start(tmp, autoPlay);
+					ExternalCall.ec.addPlayer(startVideo, pauseVideo, stopVideo, jumpProgress, mute, unmute, changleClear);
 				}
 			}
+		}
+		private function selectedClear(clear:String):RTMPInfo {
+			var index:uint;
+			var selectedList:Vector.<String> = Vector.<String>([
+												clear,SD,HD,BD
+												]);
+			for each (var item:String in selectedList){
+				index = _chan.indexOf(item);
+				if (index < _chan.list.length) return _chan.list[index];
+			}
+			return null;
 		}
 		public function closed():void {
 			if (_video.connected) {
 				LOG.addStep("Player.close");
+				ExternalCall.ec.removePlayer();
 				uiClose();
 				_video.closed();
 				_video.removeEventListener(GN100Video.METE_DATA, videoMeteData);
@@ -116,6 +130,11 @@ package gh.player {
 		public function pauseVideo():void {
 			if (_video.connected) {
 				_video.pausePlay();
+			}
+		}
+		public function stopVideo():void {
+			if (_video.connected) {
+				_video.closePlay();
 			}
 		}
 		public function mute():void {
