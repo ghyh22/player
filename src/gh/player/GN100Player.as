@@ -43,6 +43,7 @@ package gh.player {
 					_video.addEventListener(GN100Video.METE_DATA, videoMeteData);
 					var tmp:RTMPInfo = selectedClear(clear);
 					_video.start(tmp, autoPlay);
+					Main.RESOURCE.showVideoInfo(_video.getStreamInfo);
 					ExternalCall.ec.addPlayer(startVideo, pauseVideo, stopVideo, jumpProgress, mute, unmute, changleClear);
 				}
 			}

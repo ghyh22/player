@@ -1,15 +1,11 @@
 package gh.player.playerUI {
-	import flash.display.DisplayObject;
 	import flash.display.MovieClip;
 	import flash.display.SimpleButton;
 	import flash.display.Sprite;
-	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
-	import flash.text.TextField;
 	import flash.utils.Timer;
-	import gh.events.ParaEvent;
 	import gh.player.GN100Player;
 	import gh.player.RTMPInfo;
 	

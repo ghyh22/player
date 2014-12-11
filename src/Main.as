@@ -30,6 +30,7 @@ package {
 		public static var MCBUTTON:McButton = null;
 		public static var SWFCONFIG:SwfConfig = null;
 		public static var EXTERNALCALL:ExternalCall = null;
+		public static var RESOURCE:ResourceManager = null;
 		
 		public function Main():void {
 			if (stage) init();
@@ -69,17 +70,22 @@ package {
 				LOG.sd();
 			} else if (e.keyCode == Keyboard.P) {
 				LOG.showAppStep();
+			}else if (e.keyCode == Keyboard.R) {
+				if (RESOURCE.running) {
+					RESOURCE.close();
+				}else {
+					RESOURCE.start();
+				}
 			}else if (e.keyCode == Keyboard.C) {
 				LOG.appFlag = !LOG.appFlag;
 			}
 		}
-		private var _resourece:ResourceManager;
 		private function inits():void
 		{
 			LOG.initLog(_topLayer);
 			LOG.sd();
-			_resourece = new ResourceManager(_topLayer);
-			_resourece.start();
+			RESOURCE = new ResourceManager(_topLayer);
+			RESOURCE.start();
 			SWFCONFIG = new SwfConfig(stage.loaderInfo.parameters);
 			MCBUTTON = new McButton();
 		}

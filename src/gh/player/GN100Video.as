@@ -8,6 +8,7 @@ package gh.player {
 	import flash.media.Video;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
+	import flash.net.NetStreamInfo;
 	import gh.events.ParaEvent;
 	import gh.player.playerUI.PlayerUI;
 	
@@ -323,6 +324,15 @@ package gh.player {
 			}
 			return _totalTime;
 		}
+		public function getStreamInfo():String {
+			var str:String = "";
+			if (_stream != null) {
+				var info:NetStreamInfo = _stream.info;
+				var speed:Number = info.currentBytesPerSecond / 1024 / 1024;
+				str += "loadSpeed: " + speed.toFixed(2) + "m";
+			}
+			return str;
+		}
 		/**
 		 * streamClient
 		 */
@@ -330,12 +340,14 @@ package gh.player {
 			trace("metadata: duration=" + info.duration + " width=" + info.width + " height=" + info.height + " framerate=" + info.framerate);
 			_totalTime = info["duration"];
 			dispatchEvent(new Event(METE_DATA));
+			LOG.show("Video MetaData");
 		}
 		public function onCuePoint(info:Object):void {
 			trace("cuepoint: time=" + info.time + " name=" + info.name + " type=" + info.type);
+			LOG.show("Video CuePoint");
 		}
 		public function onPlayStatus(info:Object):void {
-			trace("playstatus: ");
+			LOG.show("Video PlayStatus");
 		}
 	}
 }

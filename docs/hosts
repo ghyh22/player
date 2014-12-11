@@ -19,7 +19,8 @@
 # localhost name resolution is handled within DNS itself.
 #	127.0.0.1       localhost
 #	::1             localhost
-123.57.133.141	player.api.gn100.com
-123.57.133.141	live.api.gn100.com
-123.57.133.141	mgr.dev.gn100.com
+
 115.29.137.244	api.gn100.com
+115.29.137.244	mgr.gn100.com
+115.29.137.244	www.gn100.com
+115.29.137.244	bbs.gn100.com

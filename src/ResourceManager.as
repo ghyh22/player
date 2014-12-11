@@ -13,6 +13,7 @@ package  {
 	public class ResourceManager {
 		private var _text:TextField;
 		private var _container:Sprite;
+		private var _videoInfo:Function;
 		public function ResourceManager(container:Sprite) {
 			_container = container;
 			_text = new TextField();
@@ -22,6 +23,7 @@ package  {
 			_text.background = true;
 			_text.x = _container.stage.stageWidth - _text.width;
 			_text.y = 0;
+			_videoInfo = null;
 		}
 		
 		private var _time:Number;
@@ -40,6 +42,7 @@ package  {
 		}
 		public function close():void {
 			if (running) {
+				_videoInfo = null;
 				_container.removeChild(_text);
 				_container.removeEventListener(Event.ENTER_FRAME, run);
 			}
@@ -60,11 +63,19 @@ package  {
 		
 		private function showInfo():void {
 			var str:String = "fps: " + _fps.toFixed(0) + "\n";
+			str += "stage fps: " + _container.stage.frameRate + "\n";
 			var memory:Number = System.totalMemoryNumber / 1024 / 1024;
 			str += "memory: " + memory.toFixed(2) + "\n";
 			memory = System.privateMemory / 1024 / 1024;
-			str += "total memory: " + memory.toFixed(2);
+			str += "total memory: " + memory.toFixed(2) + "\n";
+			if (_videoInfo != null) {
+				str += _videoInfo();
+			}
 			_text.text = str;
+		}
+		
+		public function showVideoInfo(fun:Function):void {
+			_videoInfo = fun;
 		}
 		
 		public function get fps():Number{

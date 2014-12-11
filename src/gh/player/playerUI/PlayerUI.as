@@ -90,7 +90,7 @@ package gh.player.playerUI {
 		public function start(remoting:Boolean):void {
 			LOG.addStep("UI.start");
 			if (remoting)_liveTime.visible = true;
-			_fullButton.visible = true;
+			setFullScreen();
 			_loading.visible = false;
 			_fullButton.addEventListener(MouseEvent.CLICK, fullScreen);
 			_quitFull.addEventListener(MouseEvent.CLICK, quitFullScreen);
@@ -102,18 +102,12 @@ package gh.player.playerUI {
 			initStatus();
 		}
 		private function fullScreen(e:MouseEvent):void {
-			if (stage.displayState == StageDisplayState.NORMAL) {
-				stage.displayState = StageDisplayState.FULL_SCREEN;
-				_fullButton.visible = false;
-				_quitFull.visible = true;
-			}
+			stage.displayState = StageDisplayState.FULL_SCREEN;
+			setFullScreen();
 		}
 		private function quitFullScreen(e:MouseEvent):void {
-			if (stage.displayState == StageDisplayState.FULL_SCREEN || stage.displayState == StageDisplayState.FULL_SCREEN_INTERACTIVE) {
-				stage.displayState = StageDisplayState.NORMAL;
-				_fullButton.visible = true;
-				_quitFull.visible = false;
-			}
+			stage.displayState = StageDisplayState.NORMAL;
+			setFullScreen();
 		}
 		
 		/**
@@ -156,6 +150,12 @@ package gh.player.playerUI {
 			}
 			tmp += s;
 			_liveTime.text = tmp;
+		}
+		
+		public function setFullScreen():void {
+			var flag:Boolean = (stage.displayState == StageDisplayState.NORMAL);
+			_fullButton.visible = flag;
+			_quitFull.visible = !flag;
 		}
 		
 		public function get clear():ClearManager{
