@@ -183,7 +183,6 @@ package gh.player {
 					_stream.play(_info.stream, 0);
 				} else if (_state == PAUSED) {
 					LOG.show("unpause");
-					//_stream.seek(_streamTime);
 					_stream.resume();
 					updateStreamStatus(STARTED);
 				}
@@ -212,11 +211,11 @@ package gh.player {
 			if (_stream != null && _state == STARTED) {
 				LOG.show("GN100Video.pausePlay");
 				_playing = false;
+				_streamTime = _stream.time;
 				if (_remoting) {
 					_stream.close();
 					updateStreamStatus(STOPPING);
 				} else {
-					_streamTime = _stream.time;
 					_stream.pause();
 					updateStreamStatus(PAUSED);
 				}

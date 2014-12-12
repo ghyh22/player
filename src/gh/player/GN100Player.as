@@ -33,11 +33,13 @@ package gh.player {
 		 * 开始播放
 		 * @param	clearName 清晰度
 		 */
-		public function start(chan:VideoChannel, autoPlay:Boolean = false, clear:String = null):void {
+		private var _progressPer:Number;
+		public function start(chan:VideoChannel, autoPlay:Boolean = false, clear:String = null, progressPer:Number = 0):void {
 			if (chan != null && chan.list.length > 0) {
 				if (_video.connected == false) {
 					LOG.addStep("Player.start");
 					_chan = chan;
+					_progressPer = progressPer;
 					_video.addEventListener(GN100Video.CONNECTION, videoConnection);
 					_video.addEventListener(GN100Video.STATUS_CHANG, videoStatusChange);
 					_video.addEventListener(GN100Video.METE_DATA, videoMeteData);
@@ -96,10 +98,13 @@ package gh.player {
 			_ui.setPlayState(_video.state);
 		}
 		private function videoMeteData(e:Event):void {
-			if (_video.remoting == false){
+			if (_video.remoting == false) {
+				if (_progressPer != 0) {
+					_video.setProgress(_progressPer);
+					_progressPer = 0;
+				}
 				_ui.playProgress.start(jumpProgress, _video.totalTime);
 			}
-			
 			startCountTime();
 		}
 		
@@ -123,7 +128,8 @@ package gh.player {
 			_ui.uiManager.close();
 			_ui.close();
 		}
-		public function startVideo():void {
+		public function startVideo(progressPer:Number = 0):void {
+			_progressPer = progressPer;
 			if (_video.connected) {
 				_video.startPlay();
 			}
@@ -195,6 +201,7 @@ package gh.player {
 		 */
 		public function changleClear(name:String):void {
 			if (_video.connected) {
+				_progressPer = _video.stream.time / _video.totalTime;
 				_video.closed();
 				_video.start(_chan.getInfo(name), true);
 			}

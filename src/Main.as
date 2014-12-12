@@ -83,10 +83,11 @@ package {
 		private function inits():void
 		{
 			LOG.initLog(_topLayer);
-			LOG.sd();
+			//LOG.sd();
 			RESOURCE = new ResourceManager(_topLayer);
 			RESOURCE.start();
 			SWFCONFIG = new SwfConfig(stage.loaderInfo.parameters);
+			LOG.show("SwfConfig: " + SWFCONFIG.toString());
 			MCBUTTON = new McButton();
 		}
 		private function loadElements():void
@@ -110,8 +111,8 @@ package {
 		
 		private function requestInfo():void {
 			var url:String;
-			if (SWFCONFIG.playInfo != null) {
-				url = SWFCONFIG.playInfo;
+			if (SWFCONFIG.playInfoURL != null) {
+				url = SWFCONFIG.playInfoURL;
 				LOG.show("playInfo from config");
 			}
 			else {
@@ -135,9 +136,11 @@ package {
 				LOG.show("使用本地视频测试.");
 				var infoList:Vector.<RTMPInfo> = Vector.<RTMPInfo>([
 													new RTMPInfo("超清", null, "D:/video/nw.mp4"),
+													new RTMPInfo("高清", null, "D:/video/nw.mp4"),
+													new RTMPInfo("标清", null, "D:/video/nw.mp4"),
 													//new RTMPInfo("超清", "rtmp://121.42.56.177/live", "xxx"),
-													new RTMPInfo("高清", "rtmp://121.42.56.177/live", "xxx"),
-													new RTMPInfo("标清", "rtmp://121.42.56.177/live", "xxx"),
+													//new RTMPInfo("高清", "rtmp://121.42.56.177/live", "xxx"),
+													//new RTMPInfo("标清", "rtmp://121.42.56.177/live", "xxx"),
 													//new RTMPInfo("超清", null, "http://www.helpexamples.com/flash/video/cuepoints.flv")
 													]);
 				var chan:VideoChannel = new VideoChannel("0", infoList);
@@ -150,8 +153,7 @@ package {
 			
 			_player = new GN100Player(stage.stageWidth, stage.stageHeight);
 			_bottomLayer.addChild(_player);
-			_player.start(_playerInfo.chan, SWFCONFIG.autoPlay, SWFCONFIG.clear);
-			LOG.show("clear num: " + _playerInfo.chan.list.length);
+			_player.start(_playerInfo.chan, SWFCONFIG.autoPlay, SWFCONFIG.clear, SWFCONFIG.playPer);
 		}
 		private function playerClosed():void {
 			LOG.show("player closed");
